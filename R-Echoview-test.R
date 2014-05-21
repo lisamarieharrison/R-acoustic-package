@@ -203,14 +203,14 @@ EVImportRegionDef(EVFile, "C:/Users/Lisa/Documents/phd/southern ocean/BROKE-West
 
 #function to export data for acoustic variable by region
 
-EVExportRegionSv <- function(EVFile, VariableName, RegionName, FilePath){
+EVExportRegionSv <- function(EVFile, variableName, RegionName, FilePath){
   
-  acoustic.var <- EVFile[["Variables"]]$FindByName(VariableName)
+  acoustic.var <- EVFile[["Variables"]]$FindByName(variableName)
   ev.region <- EVFile[["Regions"]]$FindByName(RegionName)
   export.data <- acoustic.var$ExportDataForRegion(FilePath, ev.region)
   
   if(export.data == TRUE){
-    msg <- paste(Sys.time(),' : Exported data for Region ', RegionName, ' in Variable ', VariableName, sep='')
+    msg <- paste(Sys.time(),' : Exported data for Region ', RegionName, ' in Variable ', variableName, sep='')
     message(msg)
   } else { msg <- paste(Sys.time(),' : Failed to export data' ,sep='')
            warning(msg)
@@ -222,12 +222,81 @@ EVExportRegionSv(EVFile, '120H Sv hrp raw', 'CTD_32', "C:/Users/Lisa/Documents/p
 
 
 
+#' Changes the data range bitmap of an acoustic object
+
+#' This function sets the data range in an Echoview data range bitmap virtual variable
+#'
+#' @param varObj An Echoview acoustic variable COM object, perhaps resulting from a call of EVAcoVarNameFinder()
+#' @param minRng the minimum data value to set
+#' @param maxRng the maximum data value to set
+#' @return a list object with two elements.  $dataRangeSettings: a vector of pre- and post-function call data range settings, and $msg: message for processing log.
+#' @keywords Echoview COM scripting
+#' @export
+#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVAcoVarNameFinder}}
+#' @examples
+#' dontrun{
+#
+#'EVAppObj=COMCreate('EchoviewCom.EvApplication')
+#'}
+
+EVadjustDataRngBitmap = function(varObj,minRng,maxRng){
+  
+  #20140521 modified for RDComClient, mjc.
+  #20120221 adjust the data range of a data range bitmap variable
+  msgV = paste(Sys.time()," : Adjusting the data range of ", varObj$Name(),sep=' ')
+  message(msgV)
+  
+  #check if varObj is an acoustic variable
+  if(varObj$AsVariableAcoustic() == NULL){
+    msg = paste(Sys.time(),' : STOPPED. Input virtual variable object ', varObj$Name(), ' is not a virtual variable', sep = '')
+    warning(msg)
+    msgV = c(msgV,msg)
+    return(list(dataRangeSettings = NA, msg = msgV))
+  }
+  
+  #get pre-change min and max ranges
+  rngAttrib = varObj[["Properties"]][["DataRangeBitmap"]]
+  preMinrange = rngAttrib$RangeMinimum()
+  preMaxrange = rngAttrib$RangeMaximum()
+  msg = paste(Sys.time(),' : Preset data range values; minimum = ',preMinrange,' maximum =',preMaxrange, sep = ' ')
+  message(msg)
+  msgV = c(msgV,msg)
+  
+  #change data range
+  postMinrangeFlat = rngAttrib[['RangeMinimum']] <- minRng
+  postMaxrangeFlag = rngAttrib[['RangeMaximum']] <- maxRng
+  
+  ##Lisa- check if postMinrangeFlag and postMaxrangeFlag are boolean objects
+  
+  #check post min and max values
+  postMinrange = rngAttrib$RangeMinimum()
+  postMaxrange = rngAttrib$RangeMaximum()
+  
+  #create data range values output object:
+  datarange = data.frame(preMinrange = preMinrange, preMaxrange = preMaxrange, postMinrange = postMinrange, postMaxrange = postMaxrange)
+  row.names(datarange) = varObj$Name()
+  
+  #check post range set values equal ARGS minRng,maxRng:
+  if(postMinrange != minRng | postMaxrange != maxRng){
+    msg = paste(Sys.time()," : FAILED to set data range bitmap values in ",varObj$Name(),
+              ' Current data range values are: min =', postMinrange,'; ', postMaxrange)
+    warning(msg)
+    msgV = c(msgV,msg)
+    
+  } else{
+    msg=paste(Sys.time(),' : SUCCESS. Data range values in ',varObj$Name(),'; minimum = ',preMinrange,' maximum=',preMaxrange,sep=' ')
+  }
+  
+  return(list(datarange = datarange, msg = msgV))
+} 
 
 
 
+acoustic.var <- EVFile[["Variables"]]$FindByName('38H b hrp aspikes')
+EVadjustDataRngBitmap(acoustic.var, -999, 0)
 
-
-
+  
 
 
 
