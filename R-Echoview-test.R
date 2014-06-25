@@ -95,7 +95,7 @@ EVFindFilesetTime <- function(EVFile, filesetName){
   
 }
 
-fileset.times <- EVFindTime(EVFile, "38H-120H-200H")
+fileset.times <- EVFindFilesetTime(EVFile, "38H-120H-200H")
 
 #function to add a new class (or multiple classes)
 
@@ -122,35 +122,126 @@ EVAddNewClass <- function(EvFile, name){
 #add a new region class called CTD
 EVAddNewClass(EVFile, "CTD")  
 
-#find date and time of start of CTD drop
+#function to find date and time of start of CTD drop
 ctd.info <- read.csv(file = "C:/Users/Lisa/Documents/phd/southern ocean/BROKE-West raw data/Echoview/test/ctd_information.csv")
 
-#add zeros at the start of single digit dates and times and make into a single string
-ctd.date <- 0
-for(i in 1:nrow(ctd.info)){
-  if(nchar(ctd.info$month[i]) == 1){
-    ctd.info$month[i] <- paste(0, ctd.info$month[i], sep = "")
+EVctdTimes <- function(ctd.info){
+  
+  ctd.date <- 0
+  for(i in 1:nrow(ctd.info)){
+    
+    if(nchar(ctd.info$month[i]) == 1){
+      ctd.info$month[i] <- paste(0, ctd.info$month[i], sep = "")
+    }
+    if(nchar(ctd.info$day[i]) == 1){
+      ctd.info$day[i] <- paste(0, ctd.info$day[i], sep = "")
+    }
+    while(nchar(ctd.info$start_time[i]) < 6){
+      ctd.info$start_time[i] <- paste(0, ctd.info$start_time[i], sep = "")
+    }
+    while(nchar(ctd.info$bottom_time[i]) < 6){
+      ctd.info$bottom_time[i] <- paste(0, ctd.info$bottom_time[i], sep = "")
+    }
+    while(nchar(ctd.info$end_time[i]) < 6){
+      ctd.info$end_time[i] <- paste(0, ctd.info$end_time[i], sep = "")
+    }
+    
+    #pad times with 0's to make correct length for .evr file
+    ctd.info$start_time[i]  <- paste(ctd.info$start_time[i], 0, 0, 0, 0, sep = "")
+    ctd.info$bottom_time[i] <- paste(ctd.info$bottom_time[i], 0, 0, 0, 0, sep = "")
+    ctd.info$end_time[i]    <- paste(ctd.info$end_time[i], 0, 0, 0, 0, sep = "")
+    
+    #make a single date string
+    ctd.date[i] <- paste(ctd.info$year[i], ctd.info$month[i], ctd.info$day[i], sep = "")
   }
-  if(nchar(ctd.info$day[i]) == 1){
-    ctd.info$day[i] <- paste(0, ctd.info$day[i], sep = "")
+  return(list(ctd.date = ctd.date, ctd.info.R = ctd.info))
+  
+  
+}
+
+ctd.date <- EVctdTimes(ctd.info)$ctd.date
+ctd.info <- EVctdTimes(ctd.info)$ctd.info.R
+
+#function to change start time to 1 hr before CTD drop and end time to 1 hr after
+ChangeStartTime <- function(ctd.info, ctd.date, h, m){
+  
+  library(stringr)
+  
+  #convert dates and times to POSIX* class
+  char.dt <- paste(ctd.date, substr(ctd.info$start_time, start = 1, stop = 6), sep = " ")
+  pos.dt <- strptime(char.dt, format = "%Y%m%d %H%M%S")
+  
+  hrs <- function(u) {
+    x <- u * 3600
+    return(x)
   }
-  while(nchar(ctd.info$start_time[i]) < 6){
-    ctd.info$start_time[i] <- paste(0, ctd.info$start_time[i], sep = "")
+  
+  mns <- function(m) {
+    x <- m * 60
+    return(x)
   }
-  while(nchar(ctd.info$bottom_time[i]) < 6){
-    ctd.info$bottom_time[i] <- paste(0, ctd.info$bottom_time[i], sep = "")
+  
+  #subtract time from dates
+  new.dt <- pos.dt - hrs(h) - mns(m)
+  
+  #convert back to EV compatible format
+  date.str <- substr(new.dt, start = 1, stop = 10)
+  date.str <- str_replace_all(date.str, "[^[:alnum:]]", "") #remove dashes from dates
+  
+  time.str <- substr(new.dt, start = 12, stop = 19)
+  time.str <- str_replace_all(time.str, "[^[:alnum:]]", "") #remove dashes from dates
+  #pad time with zeros to comform with Ev notation
+  time.str <- paste(time.str, 0, 0, 0, 0, sep ="")
+  
+  return(list(ctd.date = date.str, ctd.time = time.str))
+}
+
+#function to change end time to 1 hr after CTD drop
+ChangeEndTime <- function(ctd.info, ctd.date.new, h, m, ctd.start.time.new){
+  
+  library(stringr)
+  
+  #convert dates and times to POSIX* class
+  char.dt <- paste(ctd.date.new, substr(ctd.info$end_time, start = 1, stop = 6), sep = " ")
+  pos.dt <- strptime(char.dt, format = "%Y%m%d %H%M%S")
+  
+  hrs <- function(u) {
+    x <- u * 3600
+    return(x)
   }
-  while(nchar(ctd.info$end_time[i]) < 6){
-    ctd.info$end_time[i] <- paste(0, ctd.info$end_time[i], sep = "")
+  
+  mns <- function(m) {
+    x <- m * 60
+    return(x)
   }
 
-  #pad times with 0's to make correct length for .evr file
-  ctd.info$start_time[i]  <- paste(ctd.info$start_time[i], 0, 0, 0, 0, sep = "")
-  ctd.info$bottom_time[i] <- paste(ctd.info$bottom_time[i], 0, 0, 0, 0, sep = "")
-  ctd.info$end_time[i]    <- paste(ctd.info$end_time[i], 0, 0, 0, 0, sep = "")
+  days <- function(d) {
+    x <- d * 86400
+    return(x)
+  }
   
-  #make a single date string
-  ctd.date[i] <- paste(ctd.info$year[i], ctd.info$month[i], ctd.info$day[i], sep = "")
+  #subtract time from dates
+  new.dt <- pos.dt + hrs(h) + mns(m)
+  
+  #convert back to EV compatible format
+  date.str <- substr(new.dt, start = 1, stop = 10)
+  date.str <- str_replace_all(date.str, "[^[:alnum:]]", "") #remove dashes from dates
+  
+  time.str <- substr(new.dt, start = 12, stop = 19)
+  time.str <- str_replace_all(time.str, "[^[:alnum:]]", "") #remove dashes from dates
+  #pad time with zeros to comform with Ev notation
+  time.str <- paste(time.str, 0, 0, 0, 0, sep ="")
+  
+  #add an extra end day if the CTD runs overnight
+  neg.val <- as.numeric(time.str) - as.numeric(ctd.start.time.new)
+  day.chng <- which(neg.val <= 0) #find stns where end time - start time is negative
+  posix.date <- strptime(ctd.date.new, format = "%Y%m%d") #change to posix* format
+  posix.date[day.chng] <- posix.date[day.chng] + days(1) #add one day for those that need changing
+  date.str.new <- substr(posix.date, start = 1, stop = 10) #read only date values from string
+  date.str.new  <- str_replace_all(date.str.new, "[^[:alnum:]]", "") #remove dashes from dates
+  
+  
+  return(list(ctd.date.end = date.str.new, ctd.time = time.str))
 }
 
 
@@ -203,14 +294,18 @@ EVImportRegionDef(EVFile, "C:/Users/Lisa/Documents/phd/southern ocean/BROKE-West
 
 #function to export data for acoustic variable by region
 
-EVExportRegionSv <- function(EVFile, VariableName, RegionName, FilePath){
+EVExportRegionSv <- function(EVFile, variableName, RegionName, FilePath){
   
-  acoustic.var <- EVFile[["Variables"]]$FindByName(VariableName)
+  msg <- paste(Sys.time(),' : Exporting data for Region ', RegionName, ' in Variable ', variableName, sep='')
+  message(msg)
+  if(1 == 1) flush.console()
+  
+  acoustic.var <- EVFile[["Variables"]]$FindByName(variableName)
   ev.region <- EVFile[["Regions"]]$FindByName(RegionName)
   export.data <- acoustic.var$ExportDataForRegion(FilePath, ev.region)
   
   if(export.data == TRUE){
-    msg <- paste(Sys.time(),' : Exported data for Region ', RegionName, ' in Variable ', VariableName, sep='')
+    msg <- paste(Sys.time(),' : Exported data for Region ', RegionName, ' in Variable ', variableName, sep='')
     message(msg)
   } else { msg <- paste(Sys.time(),' : Failed to export data' ,sep='')
            warning(msg)
@@ -222,12 +317,79 @@ EVExportRegionSv(EVFile, '120H Sv hrp raw', 'CTD_32', "C:/Users/Lisa/Documents/p
 
 
 
+#' Changes the data range bitmap of an acoustic object
+
+#' This function sets the data range in an Echoview data range bitmap virtual variable
+#'
+#' @param varObj An Echoview acoustic variable COM object, perhaps resulting from a call of EVAcoVarNameFinder()
+#' @param minRng the minimum data value to set
+#' @param maxRng the maximum data value to set
+#' @return a list object with two elements.  $dataRangeSettings: a vector of pre- and post-function call data range settings, and $msg: message for processing log.
+#' @keywords Echoview COM scripting
+#' @export
+#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVAcoVarNameFinder}}
+#' @examples
+#' dontrun{
+#
+#'EVAppObj=COMCreate('EchoviewCom.EvApplication')
+#'}
+
+EVadjustDataRngBitmap = function(varObj,minRng,maxRng){
+  
+  #20140521 modified for RDComClient, mjc.
+  #20120221 adjust the data range of a data range bitmap variable
+  msgV = paste(Sys.time()," : Adjusting the data range of ", varObj$Name(),sep=' ')
+  message(msgV)
+  
+  #check if varObj is an acoustic variable
+  if((class(varObj$AsVariableAcoustic()) == "COMIDispatch") == FALSE){
+    msg = paste(Sys.time(),' : STOPPED. Input acoustic variable object ', varObj$Name(), ' is not an acoustic variable', sep = '')
+    warning(msg)
+    msgV = c(msgV,msg)
+    return(list(dataRangeSettings = NA, msg = msgV))
+  } 
+  
+  #get pre-change min and max ranges
+  rngAttrib = varObj[["Properties"]][["DataRangeBitmap"]]
+  preMinrange = rngAttrib$RangeMinimum()
+  preMaxrange = rngAttrib$RangeMaximum()
+  msg = paste(Sys.time(),' : Preset data range values; minimum = ',preMinrange,' maximum =',preMaxrange, sep = ' ')
+  message(msg)
+  msgV = c(msgV,msg)
+  
+  #change data range
+  postMinrangeFlag = rngAttrib[['RangeMinimum']] <- minRng
+  postMaxrangeFlag = rngAttrib[['RangeMaximum']] <- maxRng
+  
+  ##Lisa- check if postMinrangeFlag and postMaxrangeFlag are boolean objects
+  
+  #check post min and max values
+  postMinrange = rngAttrib$RangeMinimum()
+  postMaxrange = rngAttrib$RangeMaximum()
+  
+  #create data range values output object:
+  datarange = data.frame(preMinrange = preMinrange, preMaxrange = preMaxrange, postMinrange = postMinrange, postMaxrange = postMaxrange)
+  row.names(datarange) = varObj$Name()
+  
+  #check post range set values equal ARGS minRng,maxRng:
+  if(postMinrange != minRng | postMaxrange != maxRng){
+    msg = paste(Sys.time()," : FAILED to set data range bitmap values in ",varObj$Name(),
+              ' Current data range values are: min =', postMinrange,'; ', postMaxrange)
+    warning(msg)
+    msgV = c(msgV,msg)
+    
+  } else{
+    msg=paste(Sys.time(),' : SUCCESS. Data range values in ',varObj$Name(),'; minimum = ',preMinrange,' maximum=',preMaxrange,sep=' ')
+  }
+  
+  return(list(datarange = datarange, msg = msgV))
+} 
 
 
-
-
-
-
+acoustic.var <- EVFile[["Variables"]]$FindByName('38H b hrp aspikes')
+EVadjustDataRngBitmap(varObj = acoustic.var, -999, 0)
+ 
 
 
 
