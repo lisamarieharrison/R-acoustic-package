@@ -5,97 +5,24 @@ EVAppObj=COMCreate('EchoviewCom.EvApplication')
 
 
 #read in an Echoview file
-EVFile= EVOpenFile(EVAppObj, fileName = "C:/Users/43439535/Documents/Lisa/BROKE-West/vignette_example/Transect01-01_final.ev")$EVFile
+EVFile= EVOpenFile(EVAppObj, fileName = "C:/Users/43439535/Desktop/RAW/20120519_KAOS_all_2.ev")$EVFile
 
-#create fileset name
-EVCreateFileset(EVFile, filesetName = "EVtest")
+#add calibration file
+EVAddCalibrationFile(EVFile, "038-120-200", "C:/Users/43439535/Desktop/RAW/20120326_KAOS_SimradEK5.ecs")
 
-#function to add calibration file to fileset
-EVAddCalibrationFile <- function(EVFile, filesetName, calibrationFile){
-  
-  destination.fileset = EVFindFilesetByName(EVFile, filesetName)$fileset
-  destination.fileset$SetCalibrationFile(calibrationFile)  
-  
-  msg=paste(Sys.time(),' : Adding ', calibrationFile,' to fileset name ',filesetName,sep='')
-  message(msg)
-}
-
-EVAddCalibrationFile(EVFile, "38H-120H-200H", "C:/Users/Lisa/Documents/phd/southern ocean/BROKE-West raw data/Echoview/test/SimradEK60DSRII2010.ecs")
-
-
-#function to clear all files from fileset
-
-EVClearRawData=function(EVFile,filesetName)
-{
-  destination.fileset=EVFindFilesetByName(EVFile,filesetName)$filesetObj
-  
-  nbr.of.raw.in.fileset=destination.fileset[["DataFiles"]]$Count()
-     
-  #remove files
-  msgV=paste(Sys.time(),' : Removing data files from EV file ',sep='')
-  message(msgV)
-  
-  while(nbr.of.raw.in.fileset > 0){
-    dataFiles <- destination.fileset[["DataFiles"]]$Item(0)$FileName()
-    
-    rmfile <- destination.fileset[["DataFiles"]]$Item(0)
-    destination.fileset[["DataFiles"]]$Remove(rmfile) 
-    nbr.of.raw.in.fileset=destination.fileset[["DataFiles"]]$Count()
-    
-    msg=paste(Sys.time(),' : Removing ', basename(dataFiles),' from fileset name ',filesetName,sep='')
-    message(msg)
-    msgV=c(msgV,msg)
-  }
-}
 
 #clear raw data from fileset
-EVClearRawData(EVFile, "38H-120H-200H")
-
-#read names of .raw files in a Fileset
-EVFilesInFileset = function(EVFile, filesetName){
-  
-  fileset.loc = EVFindFilesetByName(EVFile, filesetName)$filesetObj
-  nbr.of.raw.in.fileset.pre = fileset.loc[["DataFiles"]]$Count()
-  
-  raw.names <- 0
-  for(i in 0:(nbr.of.raw.in.fileset.pre - 1)){
-    raw.names[i + 1] <- basename(fileset.loc[["DataFiles"]]$Item(i)$FileName())
-  }
-  
-  msg = paste(Sys.time(),' : Returned names for ', nbr.of.raw.in.fileset.pre, ' data files in fileset ', filesetName ,sep = '')
-  message(msg)
-  return(raw.names)
-  
-}
-
+EVClearRawData(EVFile, "038-120-200")
 
 #add multiple raw data file to EV test
+destination.fileset   <- EVFindFilesetByName(EVFile, "038-120-200")$filesetObj
+raw.files <- list.files(path = "C:/Users/43439535/Desktop/RAW/", pattern= "*\\.raw$", full.names = T) 
+EVAddRawData(EVFile = EVFile, filesetName = "038-120-200", dataFiles = raw.files)
 
-raw.files <- list.files(path = "C:/Users/Lisa/Documents/phd/southern ocean/BROKE-West raw data/Echoview/test/", pattern= "38H_120H_200H-D20060121.*\\.raw", full.names = T) 
-EVAddRawData(EVFile = EVFile, filesetName = "38H-120H-200H", dataFiles = raw.files)
 
-
-#function to check the time range for the fileset
-
-EVFindFilesetTime <- function(EVFile, filesetName){
-  
-  fileset.loc = EVFindFilesetByName(EVFile, filesetName)$filesetObj
-  
-  start.date <- as.Date(trunc(fileset.loc$StartTime()), origin = "1899-12-30")
-  percent.day.elapsed <- fileset.loc$StartTime() - trunc(fileset.loc$StartTime())
-  seconds.elapsed <- 86400*percent.day.elapsed
-  start.time <- as.POSIXct(seconds.elapsed, origin = start.date, tz = "GMT")
-  
-  end.date <- as.Date(trunc(fileset.loc$EndTime()), origin = "1899-12-30")
-  percent.day.elapsed <- fileset.loc$EndTime() - trunc(fileset.loc$EndTime())
-  seconds.elapsed <- 86400*percent.day.elapsed
-  end.time <- as.POSIXct(seconds.elapsed, origin = end.date, tz = "GMT")
-  
-  return(list(start.time = start.time, end.time = end.time))
-  
-}
-
-fileset.times <- EVFindFilesetTime(EVFile, "38H-120H-200H")
+#check times covered by the fileset
+fileset.times <- EVFindFilesetTime(EVFile, "038-120-200")
+fileset.times
 
 #function to add a new class (or multiple classes)
 
@@ -118,7 +45,7 @@ EVAddNewClass <- function(EvFile, name){
     }  
   }
 }
-  
+
 #add a new region class called CTD
 EVAddNewClass(EVFile, "CTD")  
 
@@ -214,7 +141,7 @@ ChangeEndTime <- function(ctd.info, ctd.date.new, h, m, ctd.start.time.new){
     x <- m * 60
     return(x)
   }
-
+  
   days <- function(d) {
     x <- d * 86400
     return(x)
@@ -280,12 +207,12 @@ EVImportRegionDef <- function(EvFile, evr, region_name){
     CheckName <- EvFile[["Regions"]]$FindByName(region_name)
     
     if(is.null(CheckName) == FALSE){ msg <- paste(Sys.time(),' : Imported region definitions: Region ',region_name,' added',sep='')
-          message(msg)
+                                     message(msg)
     } else { msg <- paste(Sys.time(),' : Failed to import region definitions' ,sep='')
              warning(msg)}
     
   } else { msg <- paste(Sys.time(),' : Failed to import region definitions: A region of that name already exists' ,sep='')
-          warning(msg) 
+           warning(msg) 
   }
 }
 
@@ -310,7 +237,7 @@ EVExportRegionSv <- function(EVFile, variableName, RegionName, FilePath){
   } else { msg <- paste(Sys.time(),' : Failed to export data' ,sep='')
            warning(msg)
   }
-           
+  
 }
 
 EVExportRegionSv(EVFile, '120H Sv hrp raw', 'CTD_32', "C:/Users/Lisa/Documents/phd/southern ocean/BROKE-West raw data/Echoview/test/test_script.csv")
@@ -375,7 +302,7 @@ EVadjustDataRngBitmap = function(varObj,minRng,maxRng){
   #check post range set values equal ARGS minRng,maxRng:
   if(postMinrange != minRng | postMaxrange != maxRng){
     msg = paste(Sys.time()," : FAILED to set data range bitmap values in ",varObj$Name(),
-              ' Current data range values are: min =', postMinrange,'; ', postMaxrange)
+                ' Current data range values are: min =', postMinrange,'; ', postMaxrange)
     warning(msg)
     msgV = c(msgV,msg)
     
@@ -389,7 +316,7 @@ EVadjustDataRngBitmap = function(varObj,minRng,maxRng){
 
 acoustic.var <- EVFile[["Variables"]]$FindByName('38H b hrp aspikes')
 EVadjustDataRngBitmap(varObj = acoustic.var, -999, 0)
- 
+
 
 #' Changes the ping subset for an acoustic variable
 #' 
@@ -403,7 +330,6 @@ EVPingSubset <- function() {
 varObj <- EVFile[["Variables"]]$FindByName('38H hri ex noise')
 
 varObj[["Properties"]][["PingSubset"]][["Ranges"]] <- "200 - 205"
-
 
 
 
