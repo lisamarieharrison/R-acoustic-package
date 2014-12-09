@@ -284,35 +284,40 @@ EVAddRawData <- function (EVFile, filesetName, dataFiles) {
   invisible(list(nbrFilesInFileset = nbr.of.raw.in.fileset, msg = msgV))
 } 
 
+
 #' Create a new Echoview (.EV) file and adds raw data files to it
 #' 
 #' This function creates a new Echoview (.EV) file and adds raw data files to it via COM scripting.  Works well when populating an existing Echoview template file with raw data files.  The newly created Echoview file will remain open in Echoview and can be accessed via the $EVFile objected returned by a successful call of this function.
 #' @param EVAppObj An EV application COM object arising from the call COMCreate('EchoviewCom.EvApplication')
 #' @param EVFileName Full path and filename of Echoview (.EV) file to be created.
+#' @param templateFn = NULL Full path and filename of template file if used.
 #' @param filesetName Echoview fileset name
 #' @param dataFiles vector of full path and name for each data file.
+#' @param CloseOnSave = TRUE close the EV file in \code{EVFileName} once saved.
 #' @return a list object with two elements.  $EVFile: EVFile COM object for the newly created Echoview file, and $msg: message for processing log. 
+#' @details For the example code to run, the example data must be downloaded from.  NB the example code assumes the data and directory structure of the example data has been maintained.
 #' @keywords Echoview COM scripting
 #' @export 
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @seealso \code{\link{EVNewFile}}  \code{\link{EVAddRawData}}  \code{\link{EVCloseFile}}
 #' @examples
 #'\dontrun{
-#'filenamesV <- c('~\\exampleData\\ek60-1.raw','~\\exampleData\\ek60-2.raw','~\\exampleData\\ek60-3.raw')
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVCreateNew(EVAppObj,templateFn="~\\Example-template",filesetName='EK60',dataFiles=filenamesV)
+#'
+#'(pathAndFn=list.files(paste(getwd(),'raw',sep='/'),full.names=TRUE))
+#'#remove any evi type files:
+#'eviLoc=grep('.evi',pathAndFn)
+#'if(length(eviLoc)>0) (pathAndFn=pathAndFn[-eviLoc])
+#'
+#'EVCreateNew(EVAppObj=EVAppObj,
+#'templateFn="c:\\Program Files (x86)\\Myriax\\Echoview\\Echoview6\\Templates\\KAOStemplate.EV",
+#'EVFileName=paste(getwd(),'kaos.ev',sep='/'),
+#'filesetName="038-120-200",
+#'dataFiles=pathAndFn)#'
 #'}
-EVCreateNew <- function (EVAppObj, templateFn = NULL, EVFileName, filesetName, dataFiles) {
-  #20100726 creates ev file from a template and populates the ev file with data.
-  #NB this function will save and close the EV file once raw data files are added.
-  #REQUIRES RDCOMClient package; EVAddRawData
-  #INPUTS: EvApp = EV program object comCreateObject("EchoviewCom.EvApplication")
-  #        template.fn = template filename located in the templates EV directory.
-  #        ev.op.dir = directory to save EV file to
-  #        ev.op.fn = EV filename.
-  #        fileset.anme = fileset name in template.fn.
-  #         dataFiles = vector of character strings for raw data location e.g.
-  #                     "D:/JC037/SW/T01/JC037-D20090822-T102525.raw" 
+EVCreateNew <- function (EVAppObj, templateFn = NULL, EVFileName, 
+                         filesetName, dataFiles,
+                         CloseOnSave=TRUE) {
   msgV <- paste(Sys.time(), ' : Creating new EV file', sep = '')
   message(msgV)
   
@@ -322,15 +327,13 @@ EVCreateNew <- function (EVAppObj, templateFn = NULL, EVFileName, filesetName, d
   msgV   <- c(msgV, EVAddRawData(EVFile = EVFile, filesetName = filesetName, 
                                  dataFiles = dataFiles)$msg)
   
-  EVOpDir <- paste(wdEV, "/", sep = "")
-  EVOpFn  <- paste(substr(names(allPathAndFnList[i]), start = 1, stop = 14), "new.ev", sep = "")
-  
-  # EVOpDir and EVOpFn not found
-  msgV   <- c(msgV, EVSaveAsFile(EVFile = EVFile, fileName = paste(EVOpDir, EVOpFn, sep = ""))$msg)
-  msgV=c(msgV,EVCloseFile(EVFile=EVFile)$msg)
+  msgV   <- c(msgV, EVSaveAsFile(EVFile = EVFile, fileName = EVFileName)$msg)
+  if(CloseOnSave)
+    msgV=c(msgV,EVCloseFile(EVFile=EVFile)$msg)
   
   return(list(EVFile = EVFile, msg = msgV))
 } 
+
 
 #' Sets minimum threshold
 #' 
@@ -395,8 +398,22 @@ EVminThresholdSet <- function (varObj, thres) {
                                     postMinThresVal = postMinThresVal), msg = msgV))
 }  
 
-## need to document this function. Is it the same as one of the other functions?
 
+#' Schools detection settings/ needs documentation
+#' 
+#' This function changes schools detection settings
+#' @param EVFile An Echoview file COM object
+#' @param varObj the EV acoustic object to change schools detection parameters for
+#' @param distanceMode which distance mode to use
+#' @param maximumHorizontalLink maximum linking distance for a swarm
+#' @param maximumVerticalLink maximum vertical linking distance for a school
+#' @param minimumCandidateHeight minimum candidate height
+#' @param minimumCandidateLength minimum candidate length
+#' @param minimumSchoolHeight minimum school height
+#' @param minimumSchoolLength minimum school length
+#' @return a list object with two elements. 
+#' @keywords Echoview COM scripting
+#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
                               maximumHorizontalLink,
                               maximumVerticalLink,
@@ -468,7 +485,7 @@ EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
   setDiff <- which(postSettingDistances != setVec)
   if (length(setDiff) > 0) {
     msg <- paste(Sys.time(), ' : Failed to set schools detection parameters: ',
-                 paste(names(PostSettingDistances)[setDiff], collapse = ', '), sep = '')
+                 paste(names(postSettingDistances)[setDiff], collapse = ', '), sep = '')
     invisible(msg)
     stop(msg)
   } else {
@@ -535,7 +552,7 @@ EVRegionClassFinder <- function (EVFile, regionClassName) {
 #' 
 #' This function deletes a region class within an Echoview object using COM scripting.
 #' @param EVFile An Echoview file COM object
-#' @param regionClassCOMobj An Echoview region object
+#' @param regionClassCOMObj An Echoview region object
 #' @return a list object with two elements. $EVVar: An Echoview acoustic variable object, and $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
@@ -745,7 +762,7 @@ msDATEConversion <- function (dateObj) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -779,7 +796,7 @@ EVAddCalibrationFile <- function (EVFile, filesetName, calibrationFile) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -814,7 +831,7 @@ EVFilesInFileset <- function (EVFile, filesetName) {
 #' @keywords Echoview COM scripting 
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -852,7 +869,7 @@ EVClearRawData <- function (EVFile, filesetName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #'EVAppObj = COMCreate('EchoviewCom.EvApplication')
@@ -890,7 +907,7 @@ EVFindFilesetTime <- function (EVFile, filesetName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #'EVAppObj = COMCreate('EchoviewCom.EvApplication')
@@ -924,7 +941,7 @@ EVNewRegionClass <- function (EVFile, className) {
 #' @keywords Echoview COM scripting 
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #'EVAppObj = COMCreate('EchoviewCom.EvApplication')
@@ -968,7 +985,7 @@ EVImportRegionDef <- function (EVFile, evrFile, regionName) {
 #' @keywords Echoview COM scripting 
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}} \code{\link{EVImportRegionDef}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVImportRegionDef}}
 #' @examples
 #' \dontrun{
 #' EVAppObj = COMCreate('EchoviewCom.EvApplication')
@@ -1002,7 +1019,7 @@ EVExportRegionSv <- function (EVFile, variableName, regionName, filePath) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}} \code{\link{EVAcoVarNameFinder}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVAcoVarNameFinder}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1056,12 +1073,12 @@ EVAdjustDataRngBitmap <- function (varObj, minRng, maxRng) {
 
 #' This function finds an EV Line in an EV file object by name using COM scripting.
 #' @param EVFile An Echoview file COM object
-#' @param acousticVarName a string containing the name of an EV acoustic variable
+#' @param lineName a string containing the name of the line to find
 #' @return an Echoview line object
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1087,9 +1104,9 @@ EVFindLineByName <- function (EVFile, lineName) {
 
 #' This function sets the grid separation and depth reference line for an acoustic variable using COM scripting.
 #' @param EVFile An Echoview file COM object
-#' @param acousticVarName a string containing the name of an EV acoustic variable
-#' @param verticalType. 0 = no grid, 1 = time (minutes), 2 = GPS distance (NMi), 3 = Vessel Log Distance (NMi), 4 = Pings, 5 = GPS distance (m), 6 = Vessel Log Distance (m). 
-#' @param horizontalType. 0 = no grid, 1 = depth grid, 2 = use reference line.
+#' @param acousticVar an EV acoustic variable object
+#' @param verticalType 0 = no grid, 1 = time (minutes), 2 = GPS distance (NMi), 3 = Vessel Log Distance (NMi), 4 = Pings, 5 = GPS distance (m), 6 = Vessel Log Distance (m). 
+#' @param horizontalType 0 = no grid, 1 = depth grid, 2 = use reference line.
 #' @param verticalDistance vertical grid line spacing. Not needed if verticalType = 0. 
 #' @param horizontalDistance horizontal grid line spacing. Not needed if horizontalType = 0. 
 #' @param EVLine an EV line object. Not needed if horizontalType = 0.
@@ -1097,7 +1114,7 @@ EVFindLineByName <- function (EVFile, lineName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}} \code{\link{EVAcoVarNameFinder}} \code{\link{EVFindLineByName}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVAcoVarNameFinder}} \code{\link{EVFindLineByName}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1192,7 +1209,7 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj = COMCreate('EchoviewCom.EvApplication')
@@ -1229,12 +1246,12 @@ EVExportIntegrationByCells <- function (EVFile, variableName, filePath) {
 #' This function adds a new acoustic variable using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param oldVarName a string containing the name of the acoustic variable to base the new variable on
-#' @param enum: Enum code for operator. 0 = raw data.
+#' @param enum Enum code for operator. 0 = raw data.
 #' @return an object: returns the new variable
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' #create a 7x7 convolution of a variable
@@ -1274,7 +1291,7 @@ EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1326,7 +1343,7 @@ EVShiftRegionDepth <- function (EVFile, regionName, depthMultiply, depthAdd) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1371,7 +1388,7 @@ EVShiftRegionTime <- function (EVFile, regionName, days = 0, hours = 0, minutes 
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1409,7 +1426,7 @@ EVGetCalibrationFileName <- function (EVFile, filesetName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1460,7 +1477,7 @@ EVNewLineRelativeRegion <- function (EVFile, varName, regionName, line1, line2, 
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1503,7 +1520,7 @@ EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1538,7 +1555,7 @@ EVDeleteLine <- function (EVFile, evLine) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}} \code{\link{EVNewFixedDepthLine}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVNewFixedDepthLine}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1559,7 +1576,8 @@ EVRenameLine <- function (EVFile, evLine, newName) {
   
   #check that line has been renamed
   if (evLine$Name() == newName) {
-    message(paste(Sys.time(), "Success: Line renamed as", newName, sep = " "))
+    msg <- (paste(Sys.time(), "Success: Line renamed as", newName, sep = " "))
+    message(msg)
   } else {
     stop(paste(Sys.time(), "Error: Could not rename line"))
   }
@@ -1575,7 +1593,7 @@ EVRenameLine <- function (EVFile, evLine, newName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1607,7 +1625,7 @@ EVFindRegionByName <- function (EVFile, regionName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}} 
+#' @seealso \code{\link{EVOpenFile}} 
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1616,7 +1634,7 @@ EVFindRegionByName <- function (EVFile, regionName) {
 #'}
 EVExportRegionDef <- function (EVFile, regionName, filePath) {
   
-  ev.region <- EVFindRegionByName(EVFile, regionName)
+  ev.region <- EVAddCalibrationFile(EVFile, regionName)
   
   if (exists("ev.region") == FALSE) {
     stop(paste("Couldn't find region named", regionName, sep = " "))
@@ -1644,7 +1662,7 @@ EVExportRegionDef <- function (EVFile, regionName, filePath) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}} \code{\link{EVRegionClassFinder}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVRegionClassFinder}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1673,7 +1691,7 @@ EVExportRegionDefByClass <- function (evRegionClass, filePath) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVFile}} \code{\link{EVFindRegionByName}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVFindRegionByName}}
 #' @examples
 #' \dontrun{
 #' ev.region <- EVFindRegionByName(EVFile, regionName)
@@ -1708,6 +1726,7 @@ EVFindRegionClass <- function (evRegion) {
 #' @seealso \code{\link{zigzagSurvey}}
 #' @author Martin Cox \email{martin.cox@@aad.gov.au}
 #' @examples
+#' \dontrun{
 #' (coords=lawnSurvey(startLon=-170,startLat=-60,lineLengthkm=2,lineSpacingkm=0.5,
 #'startBearingdeg=30,numOfLines=5))
 #'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
@@ -1717,9 +1736,9 @@ EVFindRegionClass <- function (evRegion) {
 #'points(coords[1,1],coords[1,2],col='blue',pch=17,cex=2)
 #'points(coords[nrow(coords),1],coords[nrow(coords),2],col='blue',pch=15,cex=2)
 #'legend('topright',c('Beginning','End'),col='blue',pch=c(17,15))
+#'}
 lawnSurvey=function(startLon,startLat,lineLengthkm,lineSpacingkm,startBearingdeg,numOfLines)
 {
-  require(geosphere)
   lineLengthm=lineLengthkm*1e3;lineSpacingm=lineSpacingkm*1e3
   direct=startBearingdeg+90
   direct[direct>360]=direct-360
@@ -1752,7 +1771,6 @@ lawnSurvey=function(startLon,startLat,lineLengthkm,lineSpacingkm,startBearingdeg
 #' @param startLon start longitude of survey.
 #' @param startLat start latitude of survey.
 #' @param lineLengthkm transect line length in km.
-#' @param lineSpacingkm inter-transect spacing in km.
 #' @param startBearingdeg Bearing of each transect in degrees.
 #' @param rotationdeg rotation angle for entire survey pattern.
 #' @param numOfLines Number of transects.
@@ -1763,6 +1781,7 @@ lawnSurvey=function(startLon,startLat,lineLengthkm,lineSpacingkm,startBearingdeg
 #' @seealso \link{zigzagSurvey}
 #' @author Martin Cox \email{martin.cox@@aad.gov.au}
 #' @examples
+#' \dontrun{
 #' coords=zigzagSurvey(startLon=-100,startLat=-60,lineLengthkm=2,startBearingdeg=30,
 #' rotationdeg=10,numOfLines=11)
 #'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
@@ -1787,12 +1806,10 @@ lawnSurvey=function(startLon,startLat,lineLengthkm,lineSpacingkm,startBearingdeg
 #'arrows(x0=coordsRotate[1:(nrow(coordsRotate)-1),1], y0=coordsRotate[1:(nrow(coordsRotate)-1),2], 
 #'       x1 = coordsRotate[2:nrow(coordsRotate),1], y1 = coordsRotate[2:nrow(coordsRotate),2],col='blue')
 #'legend('bottomleft',c('Unrotated','Rotated'),lty=1,col=c(1,'blue'))
+#'}
 zigzagSurvey=function(startLon,startLat,lineLengthkm,startBearingdeg,rotationdeg,numOfLines,
                       proj4string=CRS("+proj=longlat +datum=WGS84"),unrotated=FALSE)
 {
-  require(geosphere)
-  require(sp)
-  require(maptools)
   lineLengthm=lineLengthkm*1e3
   angs=c(startBearingdeg,180-startBearingdeg)
   lineIND=1:numOfLines
@@ -1823,6 +1840,7 @@ zigzagSurvey=function(startLon,startLat,lineLengthkm,startBearingdeg,rotationdeg
 #'@details The call of \link{zigzagSurvey} has \code{unrotated=FALSE}
 #'@export
 #'@examples
+#'\dontrun{
 #'coords=centreZigZagOnPosition(centreLon=-33,centreLat=-57,lineLengthkm=60,startBearingdeg=30,
 #'rotationdeg=10,numOfLines=21)
 #'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
@@ -1835,12 +1853,10 @@ zigzagSurvey=function(startLon,startLat,lineLengthkm,startBearingdeg,rotationdeg
 #'points(geomean(coords),col='red',pch=19,cex=1)
 #'legend('topright',c('Beginning','End','Desired centre','Actual centre'),
 #'  col=c('blue','blue','purple','red'),pch=c(17,15,19,19),pt.cex=c(1,1,2,1))
+#'  }
 centreZigZagOnPosition=function(centreLon,centreLat,
                                 proj4string=CRS("+proj=longlat +datum=WGS84"),tolerance=20,...)
 {
-  require(geosphere)
-  require(sp)
-  require(maptools)
   coords=zigzagSurvey(startLon=centreLon,startLat=centreLat,proj4string=proj4string,
                       unrotated=FALSE,...)
   centreCoords=(geomean(coords))
@@ -1866,6 +1882,7 @@ centreZigZagOnPosition=function(centreLon,centreLat,
 #'@return Line transect coordinates (lon, lat) as specified in \link{lawnSurvey}
 #'@export
 #'@examples
+#'\dontrun{
 #'coords=centreLawnOnPosition(centreLon=-170,centreLat=-60,lineLengthkm=2,lineSpacingkm=0.5,
 #'startBearingdeg=30,numOfLines=5)
 #'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
@@ -1878,11 +1895,10 @@ centreZigZagOnPosition=function(centreLon,centreLat,
 #'points(geomean(coords),col='red',pch=19,cex=1)
 #'legend('bottomright',c('Beginning','End','Desired centre','Actual centre'),
 #'  col=c('blue','blue','purple','red'),pch=c(17,15,19,19),pt.cex=c(1,1,2,1))
+#'}
 centreLawnOnPosition=function(centreLon,centreLat,
                               proj4string=CRS("+proj=longlat +datum=WGS84"),tolerance=20,...)
 {
-  require(geosphere)
-  require(sp)
   coords=lawnSurvey(startLon=centreLon,startLat=centreLat,...)
   centreCoords=(geomean(coords))
   shiftV=c(centreLon-centreCoords[1],centreLat-centreCoords[2])
