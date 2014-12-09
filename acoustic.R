@@ -20,7 +20,7 @@ EVOpenFile <- function (EVAppObj, fileName) {
   chkAlreadyOpen <- EVAppObj[['EvFiles']]$FindByFileName(fileName)
   if (!is.null(chkAlreadyOpen)) {
     msg <- c(msg,paste(Sys.time(), ' : File already open. EVOpenFile() 
-                    returning existing EV file in EVFile object ', fileName, sep = ''))
+                       returning existing EV file in EVFile object ', fileName, sep = ''))
     message(msg[2])
     return(list(EVFile = chkAlreadyOpen, msg = msg))
   }
@@ -341,8 +341,6 @@ EVCreateNew <- function (EVAppObj, templateFn = NULL, EVFileName, filesetName, d
 #' @keywords Echoview COM scripting
 #' @export 
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-
 EVminThresholdSet <- function (varObj, thres) {
   varDat <- varObj[["Properties"]][["Data"]]
   preThresApplyFlag <- varDat$ApplyMinimumThreshold()
@@ -400,12 +398,12 @@ EVminThresholdSet <- function (varObj, thres) {
 ## need to document this function. Is it the same as one of the other functions?
 
 EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
-                            maximumHorizontalLink,
-                            maximumVerticalLink,
-                            minimumCandidateHeight,
-                            minimumCandidateLength,
-                            minimumSchoolHeight,
-                            minimumSchoolLength) {
+                              maximumHorizontalLink,
+                              maximumVerticalLink,
+                              minimumCandidateHeight,
+                              minimumCandidateLength,
+                              minimumSchoolHeight,
+                              minimumSchoolLength) {
   # 20120309 set schools detection parameters.
   #ARGS: EvFile = EV file object;
   # var.nbr = EV virtual variable object number to change the threshold of
@@ -494,9 +492,6 @@ EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-
-
 EVAcoVarNameFinder <- function (EVFile, acoVarName) {
   
   obj <- EVFile[["Variables"]]$FindByName(acoVarName)
@@ -521,10 +516,8 @@ EVAcoVarNameFinder <- function (EVFile, acoVarName) {
 #' @param regionClassName A string containing the name of an Echoview region 
 #' @return a list object with two elements. $regionClass: The class of the region, and $msg: message for processing log.
 #' @keywords Echoview COM scripting
-#' @export 
+#' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-
 EVRegionClassFinder <- function (EVFile, regionClassName) {
   obj <- EVFile[["RegionClasses"]]$FindByName(regionClassName)
   if (is.null(obj)) {
@@ -543,12 +536,10 @@ EVRegionClassFinder <- function (EVFile, regionClassName) {
 #' This function deletes a region class within an Echoview object using COM scripting.
 #' @param EVFile An Echoview file COM object
 #' @param regionClassCOMobj An Echoview region object
-#' @return 
+#' @return a list object with two elements. $EVVar: An Echoview acoustic variable object, and $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-
 EVDeleteRegionClass <- function (EVFile, regionClassCOMObj) {
   classChk <- class(regionClassCOMObj)[1]
   if (classChk != 'COMIDispatch') {
@@ -577,14 +568,14 @@ EVDeleteRegionClass <- function (EVFile, regionClassCOMObj) {
 #' @param acoVarName A string containing the name of the acoustic variable to perform the analysis on
 #' @param outputRegionClassName A string containing the name of the output region
 #' @param deleteExistingRegions Logical TRUE or FALSE 
-#' @param distanceMode
+#' @param distanceMode for schools detection (see Echoview help).
 #' @param maximumHorizontalLink The maximum horizontal link in meters 
 #' @param maximumVerticalLink The maximum vertical link in meters
 #' @param minimumCandidateHeight The minimum candidate height in meters
 #' @param minimumCandidateLength the minimum candidate length in meters
 #' @param minimumSchoolHeight The minimum school height in meters
 #' @param minimumSchoolLength The minimum school length in meters
-#' @param dataThreshold
+#' @param dataThreshold minimum integration threshold (units: dB re 1m^-1)
 #' @return a list object with four elements. $nbrOfDetectedschools, $thresholdData, $schoolsSettingsData, and $msg: message for processing log
 #' @keywords Echoview COM scripting
 #' @export
@@ -619,7 +610,7 @@ EVSchoolsDetect <- function(
   minimumSchoolHeight,
   minimumSchoolLength,
   dataThreshold) {
-   
+  
   #find acoustic variable:
   varObj <- EVAcoVarNameFinder(EVFile = EVFile, acoVarName = acoVarName)
   msgV   <- varObj$msg
@@ -686,17 +677,13 @@ EVSchoolsDetect <- function(
 #' @param EVFile An Echoview file object
 #' @param acoVarName A string containing the name of an Echoview acoustic variable
 #' @param regionClassName A string containing the name of an Echoview region class
-#' @param exportFn
+#' @param exportFn export filename and path 
 #' @param dataThreshold An optional data threshold for export
-#' @return
+#' @return a list object with one element, $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
-#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-
-
 EVIntegrationByRegionsExport <- function (EVFile, acoVarName, regionClassName, exportFn,
-                                         dataThreshold = NULL) {
+                                          dataThreshold = NULL) {
   
   acoVarObj <- EVAcoVarNameFinder(EVFile = EVFile, acoVarName = acoVarName)
   msgV      <- acoVarObj$msg
@@ -739,7 +726,6 @@ EVIntegrationByRegionsExport <- function (EVFile, acoVarName, regionClassName, e
 #' @param dateObj a Microsoft date object
 #' @return time stamp in the format yyyy-mm-dd hh:mm:ss
 #' @seealso www.echoview.com
-#' @examples
 msDATEConversion <- function (dateObj) {
   
   eTimeStamp <- as.numeric(dateObj)
@@ -812,7 +798,7 @@ EVFilesInFileset <- function (EVFile, filesetName) {
   }
   
   message(paste(Sys.time(), ' : Returned names for ', nbr.of.raw.in.fileset, 
-               ' data files in fileset ', filesetName ,sep = ''))
+                ' data files in fileset ', filesetName ,sep = ''))
   
   return(raw.names)
   
@@ -843,7 +829,7 @@ EVClearRawData <- function (EVFile, filesetName) {
   
   #remove files
   message(paste(Sys.time(), ' : Removing data files from EV file ', sep =""))
-
+  
   
   while (nbr.of.raw.in.fileset > 0) {
     dataFiles <- destination.fileset[["DataFiles"]]$Item(0)$FileName()
@@ -853,7 +839,7 @@ EVClearRawData <- function (EVFile, filesetName) {
     nbr.of.raw.in.fileset <- destination.fileset[["DataFiles"]]$Count()
     
     message(paste(Sys.time(), ' : Removing ', basename(dataFiles),' from fileset name ', 
-                 filesetName, sep = ""))
+                  filesetName, sep = ""))
   }
 }
 
@@ -960,7 +946,7 @@ EVImportRegionDef <- function (EVFile, evrFile, regionName) {
     
     if (is.null(CheckName) == FALSE) {
       message(paste(Sys.time(), ' : Imported region definitions: Region ', regionName, 
-                   ' added', sep = ''))
+                    ' added', sep = ''))
     } else {
       message(paste(Sys.time(), ' : Failed to import region definitions' , sep = ''))
     }
@@ -999,11 +985,11 @@ EVExportRegionSv <- function (EVFile, variableName, regionName, filePath) {
   
   if (export.data) {
     message(paste(Sys.time(), ' : Exported data for Region ', regionName, ' in Variable ', 
-                 variableName, sep = ''))
+                  variableName, sep = ''))
   } else {
     message(paste(Sys.time(), ' : Failed to export data' , sep = ""))
   }
-
+  
 }
 
 #' Change the data range bitmap of an acoustic object
@@ -1058,7 +1044,7 @@ EVAdjustDataRngBitmap <- function (varObj, minRng, maxRng) {
   #check post range set values equal ARGS minRng,maxRng:
   if (postMinrange != minRng | postMaxrange != maxRng) {
     message(paste(Sys.time()," : FAILED to set data range bitmap values in ",varObj$Name(), ' Current data range values are: min =', postMinrange,'; ', postMaxrange))
-  
+    
   } else {
     message(paste(Sys.time(), ' : SUCCESS. Data range values in ', varObj$Name(), '; minimum = ', preMinrange,' maximum=', preMaxrange, sep = ' '))
   }
@@ -1076,14 +1062,12 @@ EVAdjustDataRngBitmap <- function (varObj, minRng, maxRng) {
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @seealso \code{\link{EVFile}}
-#' @seealso
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
 #' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
 #' EVLine <- EVFindLineByName(EVFile = EVFile, lineName= = "100m line")
 #'}
-
 EVFindLineByName <- function (EVFile, lineName) {
   
   EVLine <- EVFile[["Lines"]]$FindByName(lineName)
@@ -1140,7 +1124,7 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
   if (verticalType == 0) {
     verticalDistance <- 0
   }
-
+  
   if (horizontalType == 0) {
     horizontalDistance <- 0
     EVLine <- EVFindLineByName(EVFile = EVFile, lineName = "Surface exclusion") 
@@ -1152,14 +1136,14 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
   #change the horizontal and vertical grids
   horizontal <- acousticVar[["Properties"]][["Grid"]]$SetDepthRangeGrid(horizontalType, horizontalDistance)
   vertical   <- acousticVar[["Properties"]][["Grid"]]$SetTimeDistanceGrid(verticalType, verticalDistance)
-
+  
   #change the reference line for the depth grid
   #in try statement due to EV error that doesn't cause code to fail
   try({
-  acousticVar[["Properties"]][["Grid"]][["DepthRangeReferenceLine"]] <- EVLine
+    acousticVar[["Properties"]][["Grid"]][["DepthRangeReferenceLine"]] <- EVLine
   }, silent = TRUE)
-    
-
+  
+  
   #get unit type depending on specified grid types
   vertical.codes <- c(0:6)
   vertical.unit.types <- c("no grid", "minutes", "nautical miles", "nautical miles", "pings", "meters", "meters")
@@ -1218,7 +1202,7 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
 
 
 EVExportIntegrationByCells <- function (EVFile, variableName, filePath) {
-
+  
   acoustic.var <- EVFile[["Variables"]]$FindByName(variableName)
   
   #check that the acoustic variable exists
@@ -1226,7 +1210,7 @@ EVExportIntegrationByCells <- function (EVFile, variableName, filePath) {
     message(paste(Sys.time(), "Error:", variableName, "is not an acoustic variable", sep = " "))  
     
   } else {
-  
+    
     export.data <- acoustic.var$ExportIntegrationByCellsAll(filePath)
     
     if (export.data) {
@@ -1258,8 +1242,6 @@ EVExportIntegrationByCells <- function (EVFile, variableName, filePath) {
 #' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
 #' EVNewAcousticVar(EVFile = EVFile, oldVarName = "120H-38H Sv mri 0-250m", enum = 43)
 #'}
-
-
 EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
   
   acoustic.var <- EVFile[["Variables"]]$FindByName(oldVarName)
@@ -1267,7 +1249,7 @@ EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
   if (is.null(acoustic.var)) {
     stop(paste(Sys.time(), "Error: Could not find the variable ", oldVarName))    
   } else {
-    message(paste(Sys.time(), "Found the variable", oldVarName, sep = " ")
+    message(paste(Sys.time(), "Found the variable", oldVarName, sep = " "))
   } 
   
   newVar <- acoustic.var$AddVariable(enum)
@@ -1279,10 +1261,7 @@ EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
   } 
   
   return(newVar)
-  
 }
-
-
 
 #' Change the depth of an Echoview Region
 
@@ -1291,7 +1270,7 @@ EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
 #' @param regionName a string containing the name of the Echoview region
 #' @param depthMultiply a numeric value to multiply the vertical size of the region by 
 #' @param depthAdd a numeric value to offset the region depth by. Positive = decrease depth; Negative = increase depth
-#' @return 
+#' @return a list object with one element, $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
@@ -1310,12 +1289,10 @@ EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
 #' #Change region depth offset by -50m without changing vertical size
 #' EVShiftRegionDepth(EVFile, "testregion", 1, -50)
 #'}
-
-
 EVShiftRegionDepth <- function (EVFile, regionName, depthMultiply, depthAdd) {
   
   region <- EVFile[["Regions"]]$FindByName(regionName)
-
+  
   if (is.null(region)) {
     stop(paste(Sys.time(), "Error: Could not find the region", regionName, sep = " "))
   } else {
@@ -1331,7 +1308,7 @@ EVShiftRegionDepth <- function (EVFile, regionName, depthMultiply, depthAdd) {
   }
   
   message(msg)
-  
+  return(list(msg=msg))
 }
 
 
@@ -1345,7 +1322,7 @@ EVShiftRegionDepth <- function (EVFile, regionName, depthMultiply, depthAdd) {
 #' @param minutes an integer value specifying minutes to add (positive) or subtract (negative). Default = 0
 #' @param seconds an integer value specifying seconds to add (positive) or subtract (negative). Default = 0
 #' @param milliseconds an integer value specifying milliseconds to add (positive) or subtract (negative). Default = 0
-#' @return 
+#' @return a list object with one element, $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
@@ -1361,8 +1338,6 @@ EVShiftRegionDepth <- function (EVFile, regionName, depthMultiply, depthAdd) {
 #' #Subtract 1 hour from the region time
 #' EVShiftRegionTime(EVFile, "testregion", hours = -1)
 #'}
-
-
 EVShiftRegionTime <- function (EVFile, regionName, days = 0, hours = 0, minutes = 0, seconds = 0, milliseconds = 0) {
   
   
@@ -1383,7 +1358,7 @@ EVShiftRegionTime <- function (EVFile, regionName, days = 0, hours = 0, minutes 
   }
   
   message(msg)
-  
+  invisible(list(msg=msg))
 }
 
 
@@ -1403,8 +1378,6 @@ EVShiftRegionTime <- function (EVFile, regionName, days = 0, hours = 0, minutes 
 #' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
 #' EVGetCalibrationFileName(EVFile = EVFile, filesetName = "38H-120H-200H")
 #'}
-
-
 EVGetCalibrationFileName <- function (EVFile, filesetName) {
   
   
@@ -1526,7 +1499,7 @@ EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
 #' This function deletes an Echoview line object using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param evLine an Echoview line object
-#' @return 
+#' @return a list object with one element- fucntion message for log
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
@@ -1539,17 +1512,18 @@ EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
 #' testline <- EVNewFixedDepthLine(EVFile = EVFile, depth = 50, lineName = "testline")
 #' EVDeleteLine(EVFile = EVFile, evLine = testline)
 #'}
-
-
 EVDeleteLine <- function (EVFile, evLine) {
   
   delete.line <- EVFile[["Lines"]]$Delete(evLine)
   
-  if (delete.line) {
-    message(paste(Sys.time(), "Success: Line deleted"))
-  } else {
-    message(paste(Sys.time(), "Error: Line not deleted"))
+  if (delete.line){
+    msg=paste(Sys.time(), "Success: Line deleted")
+    message(msg)
   }
+   else {
+    msg=paste(Sys.time(), "Error: Line not deleted")
+   warning(msg)}
+  invisible(list(msg=msg))
   
 }
 
@@ -1560,7 +1534,7 @@ EVDeleteLine <- function (EVFile, evLine) {
 #' @param EVFile An Echoview file COM object
 #' @param evLine an Echoview line object
 #' @param newName a string containing the new name for the line
-#' @return 
+#' @return a list object with one element- fucntion message for log
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
@@ -1572,8 +1546,6 @@ EVDeleteLine <- function (EVFile, evLine) {
 #' testline <- EVNewFixedDepthLine(EVFile = EVFile, depth = 50, lineName = "testline")
 #' EVRenameLine(EVFile = EVFile, evLine = testline, newName = "line40")
 #'}
-
-
 EVRenameLine <- function (EVFile, evLine, newName) {
   
   #check if there is already a line with the new name
@@ -1591,7 +1563,7 @@ EVRenameLine <- function (EVFile, evLine, newName) {
   } else {
     stop(paste(Sys.time(), "Error: Could not rename line"))
   }
-  
+  invisible(list(msg=msg))
 }
 
 #' Finds an Echoview region by name
@@ -1610,8 +1582,6 @@ EVRenameLine <- function (EVFile, evLine, newName) {
 #' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
 #' testRegion <- EVFindRegionByName(EVFile, "test")
 #'}
-
-
 EVFindRegionByName <- function (EVFile, regionName) {
   
   ev.region <- EVFile[["Regions"]]$FindByName(regionName)
@@ -1633,7 +1603,7 @@ EVFindRegionByName <- function (EVFile, regionName) {
 #' @param EVFile An Echoview file COM object
 #' @param regionName a string containing the region name to export definitions for
 #' @param filePath a string containing the name and file path of the file to export to
-#' @return 
+#' @return a list object with one element- fucntion message for log
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
@@ -1644,8 +1614,6 @@ EVFindRegionByName <- function (EVFile, regionName) {
 #' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
 #' EVExportRegionDef(EVFile, regionName = "test", filePath = "C:/Users/Test/Documents/region_def.csv")
 #'}
-
-
 EVExportRegionDef <- function (EVFile, regionName, filePath) {
   
   ev.region <- EVFindRegionByName(EVFile, regionName)
@@ -1657,11 +1625,13 @@ EVExportRegionDef <- function (EVFile, regionName, filePath) {
   export.def <- ev.region$ExportDefinition(filePath)
   
   if (export.def) {
-    message(paste(Sys.time(), "Success: Exported region definitions"))
+    msg=paste(Sys.time(), "Success: Exported region definitions")
+    message(msg)
   } else {
-    message(paste(Sys.time(), "Error: Failed to export region definitions"))
+    msg=paste(Sys.time(), "Error: Failed to export region definitions")
+    warning(msg)
   }
-  
+  invisible(list(msg=msg))
 }
 
 
@@ -1670,7 +1640,7 @@ EVExportRegionDef <- function (EVFile, regionName, filePath) {
 #' This function exports definitions for all Echoview regions within a region class using COM scripting
 #' @param evRegionClass an Echoview region class object
 #' @param filePath a string containing the name and file path of the file to export to
-#' @return 
+#' @return a list object with one element- fucntion message for log
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
@@ -1682,18 +1652,17 @@ EVExportRegionDef <- function (EVFile, regionName, filePath) {
 #' regionClass <- EVRegionClassFinder(EVFile, "Export")$regionClass
 #' EVExportRegionDefByClass(evRegionClass = regionClass, filePath = "C:/Users/Test/Documents/region_definitions.csv")
 #'}
-
-
 EVExportRegionDefByClass <- function (evRegionClass, filePath) {
   
   export.def <- evRegionClass$ExportDefinitions(filePath)
   
   if (export.def) {
-    message(paste(Sys.time(), "Success: Exported region definitions"))
+    msg=paste(Sys.time(), "Success: Exported region definitions")
+    message(msg)
   } else {
     message(paste(Sys.time(), "Error: Failed to export region definitions"))
   }
-  
+  invisible(list(msg=msg))
 }
 
 #' Find the class of an Echoview region object
@@ -1721,205 +1690,263 @@ EVFindRegionClass <- function (evRegion) {
 }
 
 
-#' Control an Echoview ping subset virtual variable using COM scripting.
-#' 
-#' This function opens an existing Echoview (.EV) file using COM scripting.  
-#' @param EVAppObj An EV application COM object arising from the call COMCreate('EchoviewCom.EvApplication')
-#' @param acoVarName Acoustic variable name 
-#' @param pingsubsetString A ping subset string (see examples).
-#' @return a list object with two elements.  $success: ping subset successfully changed, and $msg: message for processing log. 
-#' @keywords Echoview COM scripting
-#' @export
-#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-#'\dontrun{
-#'EVAppObj=COMCreate('EchoviewCom.EvApplication')
-#'EVOpenFile(EVAppObj,'~\\example1.EV')
-#'EVpingSubset(EVFile=EVFile,acoVarName='Ping subset 38',pingsubsetString='2-7')
+#' Generate a coordinate list for a regular rectangular survey 
 #'
-#'}
-EVpingSubset=function(EVFile,acoVarName,pingsubsetString,includePingRanges=TRUE)
-{
-  varObj<-EVAcoVarNameFinder(EVFile=EVFile,acoVarName=acoVarName)
-  msgV=varObj$msg
-  varObj<-varObj$EVVar
-  msg=paste(Sys.time(),' : Changing ping subset specification in ',varObj$Name(),sep='')
-  message(msg)
-  msgV=c(msgV,msg)
-  pSub=varObj[['Properties']][['Pingsubset']]
-  message('Pre-adjust ping subset= ',pSub[['Ranges']])
-  pSub[['Ranges']]<-pingsubsetString
-  pSubPost=varObj[['Properties']][['Pingsubset']]$Ranges()
-  msg=paste(Sys.time(),' : Post change ping subset ',pSubPost,sep='')
-  message(msg)
-  msgV=c(msgV,msg)
-  identSubSets=identical(pingsubsetString,pSubPost)
-  if(!identSubSets)
-  {msg=paste(Sys.time(),' : unsuccessful ping subset change',sep= '')
-   warning(msg)
-   msgV=c(msgV,msg)
-  }
-  incExcFlag=ifelse(includePingRanges,'include','exclude')
-  msg=paste(Sys.time(),' : Setting ping range to ',incExcFlag,sep='')
-  message(msg)
-  pSub[['RangeInclusive']]<-includePingRanges
-  if(pSub[['RangeInclusive']]==includePingRanges){
-    msg=paste(Sys.time(),' : Ping range inclusive successfully set to ',includePingRanges,sep='')
-    message(msg)}
-  else{msg=paste(Sys.time(),' : Failed to set ping range inclusive flag',sep= '')
-       warning(msg)}
-  msgV=c(msgV,msg)
-  return(list(pingRangeSet=identSubSets,
-              inclusiveFlag=pSub[['RangeInclusive']],msg=msgV))  
-}  
-
-#' Export underlying data from an Echoview ping subset acoustic variable using COM scripting.
-#' 
-#' This function exports underlying data from an acoustic variable using COM scripting.  
-#'@param EVAppObj An EV application COM object arising from the call COMCreate('EchoviewCom.EvApplication')
-#'@param acoVarName Acoustic variable name 
-#'@param exportFileNameAndPath export filename and path
-#'@param pingSubSet optional 2 element vector giving start and end of a ping subset for export
-#'@return a list object with two elements.  $exportSuccess: Boolean successfully export, and $msg: message for processing log. 
-#' @export
-#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-#'\dontrun{
-#'EVAppObj=COMCreate('EchoviewCom.EvApplication')
-#'EVOpenFile(EVAppObj,'~\\example1.EV')
-#'EVExportUnderlyingData(EVFile=EVFile,acoVarName='ESx: Sv raw pings T1',exportFileNameAndPath='c:/asam/export/test2.csv')
+#'The coordinate list is generated in degrees decimal degree format (dd.ddd), with 
+#'Southern hemisphere denoted by negative numbers. Transect length and inter-transect 
+#'spacing are specified in km and bearings in degress where North 0 deg, East 90 deg, 
+#'South 180 deg and West 270 deg.
 #'
-#'}
-EVExportUnderlyingData=function(EVFile,acoVarName,exportFileNameAndPath,pingSubSet=c(-1,-1))
+#' @param startLon start longitude of survey.
+#' @param startLat start latitude of survey.
+#' @param lineLengthkm transect line length in km.
+#' @param lineSpacingkm inter-transect spacing in km.
+#' @param startBearingdeg Orientation of survey grid in degrees.
+#' @param numOfLines Number of transects.
+#' @return Geographical coordinate list of start and end of line positions
+#' @export
+#' @seealso \code{\link{zigzagSurvey}}
+#' @author Martin Cox \email{martin.cox@@aad.gov.au}
+#' @examples
+#' (coords=lawnSurvey(startLon=-170,startLat=-60,lineLengthkm=2,lineSpacingkm=0.5,
+#'startBearingdeg=30,numOfLines=5))
+#'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
+#'arrows(x0=coords[1:(nrow(coords)-1),1], y0=coords[1:(nrow(coords)-1),2], 
+#'       x1 = coords[2:nrow(coords),1], y1 = coords[2:nrow(coords),2])
+#'text(coords,row.names(coords),cex=0.6)
+#'points(coords[1,1],coords[1,2],col='blue',pch=17,cex=2)
+#'points(coords[nrow(coords),1],coords[nrow(coords),2],col='blue',pch=15,cex=2)
+#'legend('topright',c('Beginning','End'),col='blue',pch=c(17,15))
+lawnSurvey=function(startLon,startLat,lineLengthkm,lineSpacingkm,startBearingdeg,numOfLines)
 {
-  varObj<-EVAcoVarNameFinder(EVFile=EVFile,acoVarName=acoVarName)
-  msgV=varObj$msg
-  varObj<-varObj$EVVar
-  msg=paste(Sys.time(),' : Exporting underlying data from ',varObj$Name(),sep='')
-  message(msg)
-  #check pingsubset
-  if(!is.numeric(pingSubSet)){
-    msg=paste(Sys.time(),' : pingset must be numeric',sep='')
-    msgV=c(msgV,msg)
-    stop(msg)}
-  if(!length(pingSubSet)==2){
-    msg=paste(Sys.time(),' : pingset must be two elements',sep='')
-    msgV=c(msgV,msg)
-    stop(msg)
+  require(geosphere)
+  lineLengthm=lineLengthkm*1e3;lineSpacingm=lineSpacingkm*1e3
+  direct=startBearingdeg+90
+  direct[direct>360]=direct-360
+  dir2=startBearingdeg+180
+  dir2[dir2>360]=dir2-360
+  lineBearings=c(startBearingdeg,dir2)
+  out=matrix(NA,nrow=2*numOfLines,ncol=2,
+             dimnames=list(paste(rep(c('SOL','EOL'),numOfLines),
+                                 'line',sort(rep(1:numOfLines,2)),sep=''),
+                           c('lon','lat')))
+  out[1,]=c(startLon,startLat)
+  out[2,]= destPoint(p=out[1,],b=startBearingdeg,d=lineLengthm) 
+  if(numOfLines>1){
+    for(i in 1:(numOfLines-1))
+    {  
+      out[(i*2)+1,]=destPoint(p=out[i*2,],b=direct,d=lineSpacingm)
+      out[(i*2)+2,]=destPoint(p=out[(i*2)+1,],b=lineBearings[ifelse(i%%2==1,2,1)],d=lineLengthm) 
+    }
   }
-  msg=paste(Sys.time(),' : Exporting underlying data from ',varObj$Name(), 'to ',exportFileNameAndPath,sep='')
-  message(msg)
-  msgV=c(msg,msgV)
-  exportFlag=varObj$ExportData(exportFileNameAndPath, pingSubSet[1], pingSubSet[2])
-  if(exportFlag) 
-  {
-    msg=paste(Sys.time(),' : Successfully exported data',sep='')
-    message(msg)
-    msgV=c(msgV,msg)
-  }else{
-    msg=paste(Sys.time(),' : Failed to export data',sep='')
-    warnign(msg)
-    msgV=c(msgV,msg)
-  }
-  return(list(exportSuccess=exportFlag,msg=msgV))
+  return(out)
 }
 
 
-#' Export an Echoview line as a CSV file via COM.
-#' 
-#' This function exports a line associated with an acoustic variable as a CSV file using COM scripting.
-#'@param EVAppObj An EV application COM object arising from the call COMCreate('EchoviewCom.EvApplication')
-#'@param acoVarName Acoustic variable name 
-#'@param lineName line name
-#'@param pingSubSet optional 2 element vector giving start and end of a ping subset for export
-#'@param exportFileNameAndPath export filename and path for the CSV line file.
-#'@return a list object with two elements.  $exportSuccess: Boolean successfully export, and $msg: message for processing log. 
-#' @export
-#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @examples
-#'\dontrun{
-#'EVAppObj=COMCreate('EchoviewCom.EvApplication')
-#'EVOpenFile(EVAppObj,'~\\example1.EV')
-EVExportLineAsCSV(EVFile=EVFile,acoVarName='ESx: Sv raw pings T1',
-                  lineName="ESx: line data depth GPGGA",
-                  exportFileNameAndPath='c:/asam/export/line2.csv')
+#' Generate a coordinate list for a zig-zag survey 
 #'
-#'}
-## test export.line.func.
-EVExportLineAsCSV=function(EVFile,
-                           acoVarName,
-                           lineName,
-                           pingSubSet=c(-1,-1),
-                           exportFileNameAndPath,...)
+#'The coordinate list is generated in degrees decimal degree format (dd.ddd), with 
+#'Southern hemisphere denoted by negative numbers. Transect length are specified in km 
+#'and bearings in degress where North 0 deg, East 90 deg, South 180 deg and West 270 deg.
+#'
+#' @param startLon start longitude of survey.
+#' @param startLat start latitude of survey.
+#' @param lineLengthkm transect line length in km.
+#' @param lineSpacingkm inter-transect spacing in km.
+#' @param startBearingdeg Bearing of each transect in degrees.
+#' @param rotationdeg rotation angle for entire survey pattern.
+#' @param numOfLines Number of transects.
+#' @param proj4string projection string of class \link{CRS-class}
+#' @param unrotated \code{FALSE} return rotated coordinates \code{TRUE} list of rotated and unrotated coordinates.
+#' @return Geographical coordinates of start and end of line positions.  \code{unrotated=TRUE} list of rotated and unrotated coordinates
+#' @export
+#' @seealso \link{zigzagSurvey}
+#' @author Martin Cox \email{martin.cox@@aad.gov.au}
+#' @examples
+#' coords=zigzagSurvey(startLon=-100,startLat=-60,lineLengthkm=2,startBearingdeg=30,
+#' rotationdeg=10,numOfLines=11)
+#'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
+#'arrows(x0=coords[1:(nrow(coords)-1),1], y0=coords[1:(nrow(coords)-1),2], 
+#'       x1 = coords[2:nrow(coords),1], y1 = coords[2:nrow(coords),2])
+#'text(coords,row.names(coords),cex=0.6)
+#'points(coords[1,1],coords[1,2],col='blue',pch=17,cex=2)
+#'points(coords[nrow(coords),1],coords[nrow(coords),2],col='blue',pch=15,cex=2)
+#'legend('topright',c('Beginning','End'),col='blue',pch=c(17,15))
+#'#Use unrotated=TRUE and check coordinates in the returned coordinate list object are identical:
+#'coordL= zigzagSurvey(startLon=-100,startLat=-60,lineLengthkm=2,startBearingdeg=30,
+#' rotationdeg=0,numOfLines=11,unrotated=TRUE)
+#' identical(coordL[[1]],coordL[[2]])
+#' #display rotated and unrotated coordinates"
+#'coordL= zigzagSurvey(startLon=-100,startLat=-60,lineLengthkm=2,startBearingdeg=30,
+#' rotationdeg=5,numOfLines=11,unrotated=TRUE) 
+#' coords=coordL$unrotatedGeogs; coordsRotate=coordL$rotatedGeogs
+#' plot(0,0,xlim=range(c(coords[,1],coordsRotate[,1])),
+#' ylim=range(c(coords[,2],coordsRotate[,2])),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
+#'arrows(x0=coords[1:(nrow(coords)-1),1], y0=coords[1:(nrow(coords)-1),2], 
+#'       x1 = coords[2:nrow(coords),1], y1 = coords[2:nrow(coords),2])
+#'arrows(x0=coordsRotate[1:(nrow(coordsRotate)-1),1], y0=coordsRotate[1:(nrow(coordsRotate)-1),2], 
+#'       x1 = coordsRotate[2:nrow(coordsRotate),1], y1 = coordsRotate[2:nrow(coordsRotate),2],col='blue')
+#'legend('bottomleft',c('Unrotated','Rotated'),lty=1,col=c(1,'blue'))
+zigzagSurvey=function(startLon,startLat,lineLengthkm,startBearingdeg,rotationdeg,numOfLines,
+                      proj4string=CRS("+proj=longlat +datum=WGS84"),unrotated=FALSE)
 {
-  varObj<-EVAcoVarNameFinder(EVFile=EVFile,acoVarName=acoVarName)
-  msgV=varObj$msg
-  varObj<-varObj$EVVar
-  lineObj=EVLineNameFinder(EVFile=EVFile,lineName=lineName)
-  msgV=c(msgV,lineObj$msg)
-  lineObj=lineObj$lineObj
-  msg=paste(Sys.time(),' : Exporting the line ',lineObj$Name(),' from acoustic variable',varObj$Name(),' as a CSV file.',sep='')
-  message(msg)
-  msgV=c(msgV,msg)
-  #check ARG pingsubset
-  if(!is.numeric(pingSubSet)){
-    msg=paste(Sys.time(),' : pingset must be numeric',sep='')
-    msgV=c(msgV,msg)
-    stop(msg)}
-  if(!length(pingSubSet)==2){
-    msg=paste(Sys.time(),' : pingset must be two elements',sep='')
-    msgV=c(msgV,msg)
-    stop(msg)
-  }
-  msg=paste(Sys.time(),' : Exporting CSV for line ',lineObj$Name() ,' from acoustic variable ',varObj$Name(), ' to ',exportFileNameAndPath,sep='')
-  message(msg)
-  msgV=c(msg,msgV)
-  exportFlag=varObj$ExportLine(lineObj,exportFileNameAndPath, pingSubSet[1], pingSubSet[2])
-  if(exportFlag) 
-  {
-    msg=paste(Sys.time(),' : Successfully exported line',sep='')
-    message(msg)
-    msgV=c(msgV,msg)
-  }else{
-    msg=paste(Sys.time(),' : Failed to export line',sep='')
-    warnign(msg)
-    msgV=c(msgV,msg)
-  }
-  return(list(exportSuccess=exportFlag,msg=msgV))
-}  
-
-
-EVLineNameFinder=function(EVFile,lineName)
-{
-  if(length(EVFile)>1)
-    EVFile=EVFile$EVFile
-  msgV=paste(Sys.time(),' : Searching for line name ',lineName,' in EV file ',EVFile$FileName(),sep='')
-  message(msgV)
-  lineObj=EVFile[["Lines"]]$FindByName(lineName)
-  if(class(lineObj)[1]!="COMIDispatch")
-  {
-    msg=paste(Sys.time(),' : Failed to find line',sep='')
-    warning(msg)
-    msgV=c(msgV,msg)
-  } else {
-    msg=paste(Sys.time(),' : Found line ',lineObj$Name(),sep='')
-    message(msg)
-    msgV=c(msgV,msg)
-  }
-  return(list(lineObj=lineObj,msg=msgV))
-}
-
-importFileNameAndPath='c:\\ASAM\\export\\line2.csv'
-EVMetaDataFromCSVLine=function(importFileNameAndPath){
-  line=read.table(importFileNameAndPath,sep='\t')
-  fileHeader=as.character(unlist(line[1,]))
+  require(geosphere)
+  require(sp)
+  require(maptools)
+  lineLengthm=lineLengthkm*1e3
+  angs=c(startBearingdeg,180-startBearingdeg)
+  lineIND=1:numOfLines
+  out=matrix(NA,numOfLines+1,2,
+             dimnames=list(c('SOLline1',paste('EOLline',lineIND,'SOLline',lineIND+1,sep='')[-numOfLines],paste('EOLline',numOfLines,sep='')),
+                           c('lon','lat')))
+  out[1,]=c(startLon,startLat)
+  for(i in 1:numOfLines)
+    out[i+1,]=destPoint(p=out[i,], b=angs[ifelse(i%%2==1,1,2)], d=lineLengthm)
   
-  line=data.frame(line[2:nrow(line),])
-  names(line)=fileHeader
-  line$time=paste(line[,2],line[,3],sep='.')
-  formatC(as.character(line[,3]),flag='0')
+  spout=SpatialPoints(out,proj4string=proj4string)
+  rot=coordinates(elide(obj=spout,rotate=rotationdeg,center=coordinates(spout)[1,]))
+  colnames(rot)=c('lon','lat')
+  if(unrotated)
+    return(list(unrotatedGeogs=out,rotatedGeogs=rot))
+  return(rot)
 }
 
+#'Centre an zig-zag line transect survey on a given position
+#'
+#'Centres a zig-zag survey on a desired latitude and longitude
+#'@param centreLon Desired centre location of survey
+#'@param centreLat Desired centre location of survey
+#'@param proj4string projection string of class \link{CRS-class}
+#'@param tolerance maximum distance (in metres) between desired survey centre and realised survey centre
+#'@param ... other arguments to be passed into \\link{zigzagSurvey}
+#'@return Line transect coordinates as specified in \link{zigzagSurvey}
+#'@details The call of \link{zigzagSurvey} has \code{unrotated=FALSE}
+#'@export
+#'@examples
+#'coords=centreZigZagOnPosition(centreLon=-33,centreLat=-57,lineLengthkm=60,startBearingdeg=30,
+#'rotationdeg=10,numOfLines=21)
+#'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
+#'arrows(x0=coords[1:(nrow(coords)-1),1], y0=coords[1:(nrow(coords)-1),2], 
+#'       x1 = coords[2:nrow(coords),1], y1 = coords[2:nrow(coords),2])
+#'text(coords,row.names(coords),cex=0.6)
+#'points(coords[1,1],coords[1,2],col='blue',pch=17,cex=2)
+#'points(coords[nrow(coords),1],coords[nrow(coords),2],col='blue',pch=15,cex=2)
+#'points(-100,-60,col='purple',pch=19,cex=2)
+#'points(geomean(coords),col='red',pch=19,cex=1)
+#'legend('topright',c('Beginning','End','Desired centre','Actual centre'),
+#'  col=c('blue','blue','purple','red'),pch=c(17,15,19,19),pt.cex=c(1,1,2,1))
+centreZigZagOnPosition=function(centreLon,centreLat,
+                                proj4string=CRS("+proj=longlat +datum=WGS84"),tolerance=20,...)
+{
+  require(geosphere)
+  require(sp)
+  require(maptools)
+  coords=zigzagSurvey(startLon=centreLon,startLat=centreLat,proj4string=proj4string,
+                      unrotated=FALSE,...)
+  centreCoords=(geomean(coords))
+  shiftV=c(centreLon-centreCoords[1],centreLat-centreCoords[2])
+  coords=coordinates(elide(obj=SpatialPoints(coords,proj4string=proj4string),shift=shiftV))
+  colnames(coords)=c('lon','lat')
+  shiftedCentreCoords=geomean(coords)
+  errorD=distHaversine(p1=c(centreLon,centreLat), p2=geomean(coords))
+  if(errorD>tolerance)
+    stop(tolerance,' m tolerence between desired and realised survey centre exceeded.')
+  message('Difference between desired and realised survey centre = ', round(errorD,2))
+  return(coords)
+}
+
+#'Centre a regular rectangular survey on a given position
+#'
+#'Centres a regular rectangular survey on a desired latitude and longitude
+#'@param centreLon Desired centre location of survey
+#'@param centreLat Desired centre location of survey
+#'@param proj4string projection string of class \link{CRS-class}
+#'@param tolerance maximum distance (in metres) between desired survey centre and realised survey centre
+#'@param ... other arguments to be passed into \link{lawnSurvey}
+#'@return Line transect coordinates (lon, lat) as specified in \link{lawnSurvey}
+#'@export
+#'@examples
+#'coords=centreLawnOnPosition(centreLon=-170,centreLat=-60,lineLengthkm=2,lineSpacingkm=0.5,
+#'startBearingdeg=30,numOfLines=5)
+#'plot(0,0,xlim=range(coords[,1]),ylim=range(coords[,2]),type='n',xlab='Longitude, deg',ylab='Latitude, deg')
+#'arrows(x0=coords[1:(nrow(coords)-1),1], y0=coords[1:(nrow(coords)-1),2], 
+#'       x1 = coords[2:nrow(coords),1], y1 = coords[2:nrow(coords),2])
+#'text(coords,row.names(coords),cex=0.6)
+#'points(coords[1,1],coords[1,2],col='blue',pch=17,cex=2)
+#'points(coords[nrow(coords),1],coords[nrow(coords),2],col='blue',pch=15,cex=2)
+#'points(-170,-60,col='purple',pch=19,cex=2)
+#'points(geomean(coords),col='red',pch=19,cex=1)
+#'legend('bottomright',c('Beginning','End','Desired centre','Actual centre'),
+#'  col=c('blue','blue','purple','red'),pch=c(17,15,19,19),pt.cex=c(1,1,2,1))
+centreLawnOnPosition=function(centreLon,centreLat,
+                              proj4string=CRS("+proj=longlat +datum=WGS84"),tolerance=20,...)
+{
+  require(geosphere)
+  require(sp)
+  coords=lawnSurvey(startLon=centreLon,startLat=centreLat,...)
+  centreCoords=(geomean(coords))
+  shiftV=c(centreLon-centreCoords[1],centreLat-centreCoords[2])
+  coords=coordinates(elide(obj=SpatialPoints(coords,proj4string=proj4string),shift=shiftV))
+  colnames(coords)=c('lon','lat')
+  shiftedCentreCoords=geomean(coords)
+  errorD=distHaversine(p1=c(centreLon,centreLat), p2=geomean(coords))
+  if(errorD>tolerance)
+    stop(tolerance,' m tolerence between desired and realised survey centre exceeded.')
+  message('Difference between desired and realised survey centre = ', round(errorD,2),' m')
+  return(coords)
+}
+
+
+#'Write a map info file for import into Echoview.
+#'
+#'This function writes a polygon MIF file for import into Echoview and will
+#'typically be used to export survey line transects from, for example, 
+#'\link{centreLawnOnPosition}.
+#'@param coords a set of coordinates as a two column (longitude and latitude) matrix.
+#'@param pathAndFileName character string MIF file export path and filename
+#'@param pointNameExport Boolean (default=FALSE) export the name of each point.  
+#'@param pointNameScaleFactor =c(0.005,0.03) see details
+#'@details Exporting the name of each point uses the row name in the \code{coords} argument.  
+#'
+#'The \code{pointNameScaleFactor} argument is a two element numeric vector specifying the bounding 
+#'box for each point name.  The bounding box is calculated for point name i by specifying the lower left hand corner 
+#'of the point name position, with the upper right hand corner specified as 
+#'c(lon_i,lat_i)+diff(range(lon_1..n,lat_1..n))*pointNameScaleFactor where n is the total number of points i.e nrow(coords)
+#'@return Nothing
+#'@examples
+#'\dontrun{
+#'coords=centreLawnOnPosition(centreLon=-33,centreLat=-55.5,lineLengthkm=100,lineSpacingkm=10,
+#'startBearingdeg=30,numOfLines=50)
+#'exportMIF(coords=coords,pathAndFileName='c:\\Users\\martin_cox\\Documents\\test4.mif')
+#'}
+exportMIF=function(coords,pathAndFileName,pointNameExport=FALSE,pointNameScaleFactor=c(0.05,0.03))
+{
+  textV=c('VERSION 300',
+          'COLUMNS 0',
+          'DATA',
+          'PLINE',nrow(coords))
+  for(i in 1:length(textV)) write.table(textV[i],pathAndFileName,quote=F,
+                                        append=ifelse(i==1,F,T),row.names=F,
+                                        col.names=F)
+  
+  if(pointNameExport){
+    if(length(rownames(coords))!=0){
+      dgeog=apply(coords,2,function(x)diff(range(x)))*pointNameScaleFactor
+      for(i in 1:nrow(coords)){
+        textV=paste('TEXT','\"',rownames(coords)[i],'\"')
+        write.table(textV,pathAndFileName,quote=F,
+                    append=T,row.names=F,col.names=F,sep='\t')
+        write.table(cbind(coords[i,1],coords[i,2],coords[i,1]+dgeog[1],coords[i,2]+dgeog[1]),
+                    pathAndFileName,quote=F,
+                    append=T,row.names=F,col.names=F,sep='\t')
+      }
+    }
+    else {stop('No row names found in coords ARG. Set pointNameExport=FALSE or add row names!')}
+  }  
+  write.table(coords,pathAndFileName,quote=F,
+              append=T,row.names=F,col.names=F,sep='\t')
+   return(paste('')) 
+}
 
 
 
