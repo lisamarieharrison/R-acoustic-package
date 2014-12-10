@@ -1131,7 +1131,7 @@ EVFindLineByName <- function (EVFile, lineName) {
 #'}
 
 
-EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalType, verticalDistance, horizontalDistance, EVLine) {
+EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalType, verticalDistance, horizontalDistance, EVLine = NULL) {
   
   #get old grid values for error checking
   old_depth <- acousticVar[["Properties"]][["Grid"]]$DepthRangeSeparation()
@@ -1142,23 +1142,15 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
     verticalDistance <- 0
   }
   
-  if (horizontalType == 0) {
-    horizontalDistance <- 0
-    EVLine <- EVFindLineByName(EVFile = EVFile, lineName = "Surface exclusion") 
-  }
-  if (horizontalType != 2) {
-    EVLine <- EVFindLineByName(EVFile = EVFile, lineName = "Surface exclusion") 
-  }  
-  
   #change the horizontal and vertical grids
   horizontal <- acousticVar[["Properties"]][["Grid"]]$SetDepthRangeGrid(horizontalType, horizontalDistance)
   vertical   <- acousticVar[["Properties"]][["Grid"]]$SetTimeDistanceGrid(verticalType, verticalDistance)
   
   #change the reference line for the depth grid
   #in try statement due to EV error that doesn't cause code to fail
-  try({
+  if (horizontalType == 2) {
     acousticVar[["Properties"]][["Grid"]][["DepthRangeReferenceLine"]] <- EVLine
-  }, silent = TRUE)
+  }
   
   
   #get unit type depending on specified grid types
