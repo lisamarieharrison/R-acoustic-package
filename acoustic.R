@@ -10,7 +10,7 @@
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVOpenFile(EVAppObj,'~\\example1.EV')
+#'EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')
 #'}
 EVOpenFile <- function (EVAppObj, fileName) {
   nbrFilesOpen <- EVAppObj$EvFiles()$Count()
@@ -55,7 +55,7 @@ EVOpenFile <- function (EVAppObj, fileName) {
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj,'~\\example1.EV')$EVFile
+#'EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #'EVSaveFile(EVFile)
 #'}
 EVSaveFile <- function (EVFile) {
@@ -84,8 +84,8 @@ EVSaveFile <- function (EVFile) {
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj,'~\\example1.EV')$EVFile
-#'EVSaveAsFile(EVFile = EVFile, fileName = '~\\example1R1.EV')
+#'EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#'EVSaveAsFile(EVFile = EVFile, fileName = 'C:/Users/Lisa/Desktop/KAOS/KAOStemplate_test.EV')
 #'}
 EVSaveAsFile <- function (EVFile,fileName) {
   chk <- EVFile$SaveAs(fileName)
@@ -110,19 +110,16 @@ EVSaveAsFile <- function (EVFile,fileName) {
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
+#'EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #'EVCloseFile(EVFile)
+
 #'}
 EVCloseFile <- function (EVFile) {
   fn  <- EVFile$FileName()
   chk <- EVFile$Close()
   msg <- paste(Sys.time(), ':', ifelse(chk, 'Closed', 'Failed to close'), '', 
-               fn, sep = '')
-  if (chk) {
-    message(msg)
-  } else {
-    warning(msg)
-  }
+               fn, sep = ' ')
+  message(msg)
   invisible(list(chk = chk, msg = msg))
 }
 
@@ -183,7 +180,7 @@ EVNewFile <- function (EVAppObj, templateFn = NULL) {
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj,'~\\example1.EV')$EVFile
+#'EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #'EVCreateFileset(EVFile = EVFile, filesetName = 'example')
 #'}
 EVCreateFileset <- function (EVFile, filesetName) {
@@ -214,8 +211,8 @@ EVCreateFileset <- function (EVFile, filesetName) {
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj,'~\\example1.EV')$EVFile
-#'EVFindFilesetByName(EVFile = EVFile, filesetName = 'example')
+#'EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#'EVFileset <-EVFindFilesetByName(EVFile = EVFile, filesetName = '038-120-200')$filesetObj
 #'}
 EVFindFilesetByName <- function (EVFile, filesetName) {
   msgV <- paste(Sys.time(), ' : Searching for fileset name ', filesetName,' in ', 
@@ -253,10 +250,10 @@ EVFindFilesetByName <- function (EVFile, filesetName) {
 #' @seealso \code{\link{EVNewFile}}  \code{\link{EVCreateNew}}
 #' @examples
 #'\dontrun{
-#'filenamesV <- c('~\\exampleData\\ek60-1.raw','~\\exampleData\\ek60-2.raw','~\\exampleData\\ek60-3.raw')
+#'filenamesV <- c('C:/Users/Lisa/Desktop/KAOS/raw/L0055-D20030115-T171028-EK60.raw', 'C:/Users/Lisa/Desktop/KAOS/raw/L0055-D20030115-T182914-EK60.raw')
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVNewFile(EVAppObj,templateFn="~\\Example-template")$EVFile
-#'EVAddRawData(EVFile = EVFile, filesetName = 'EK60', dataFiles = filenamesV)
+#'EVFile <- EVNewFile(EVAppObj,templateFn="C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV")$EVFile
+#'EVAddRawData(EVFile = EVFile, filesetName = '038-120-200', dataFiles = filenamesV)
 #'}
 EVAddRawData <- function (EVFile, filesetName, dataFiles) {
   #get number of raw data files currently in "fileset.name" fileset
@@ -303,21 +300,20 @@ EVAddRawData <- function (EVFile, filesetName, dataFiles) {
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'
-#'(pathAndFn=list.files(paste(getwd(),'raw',sep='/'),full.names=TRUE))
-#'#remove any evi type files:
+#'pathAndFn=list.files("C:/Users/Lisa/Desktop/KAOS/raw/", full.names=TRUE)
+#'#remove any evi type files
 #'eviLoc=grep('.evi',pathAndFn)
 #'if(length(eviLoc)>0) (pathAndFn=pathAndFn[-eviLoc])
-#'
-#'EVCreateNew(EVAppObj=EVAppObj,
-#'templateFn="c:\\Program Files (x86)\\Myriax\\Echoview\\Echoview6\\Templates\\KAOStemplate.EV",
-#'EVFileName=paste(getwd(),'kaos.ev',sep='/'),
-#'filesetName="038-120-200",
-#'dataFiles=pathAndFn)#'
+#'EVCreateNewWithData(EVAppObj=EVAppObj,
+#'                  templateFn="C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV",
+#'                  EVFileName='C:/Users/Lisa/Desktop/KAOS/kaos.ev',
+#'                  filesetName="038-120-200",
+#'                  dataFiles=pathAndFn, 
+#'                  CloseOnSave = TRUE)
 #'}
-EVCreateNew <- function (EVAppObj, templateFn = NULL, EVFileName, 
-                         filesetName, dataFiles,
-                         CloseOnSave=TRUE) {
+EVCreateNewWithData <- function (EVAppObj, templateFn = NULL, EVFileName, 
+                                 filesetName, dataFiles,
+                                 CloseOnSave=TRUE) {
   msgV <- paste(Sys.time(), ' : Creating new EV file', sep = '')
   message(msgV)
   
@@ -335,15 +331,22 @@ EVCreateNew <- function (EVAppObj, templateFn = NULL, EVFileName,
 } 
 
 
-#' Sets minimum threshold
+#' Sets minimum data threshold for a variable object
 #' 
-#' This function sets the minimum threshold
+#' This function sets the minimum data threshold
 #' @param varObj An Echoview variable object
 #' @param thres The new threshold to be set
 #' @return a list object with one element. $thresholdSettings: The new threshold settings
 #' @keywords Echoview COM scripting
 #' @export 
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @examples
+#' \dontrun{
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' varObj <- EVAcoVarNameFinder(EVFile, "38 seabed and surface excluded")$EVVar
+#' EVminThresholdSet(varObj, -80)
+#' }
 EVminThresholdSet <- function (varObj, thres) {
   varDat <- varObj[["Properties"]][["Data"]]
   preThresApplyFlag <- varDat$ApplyMinimumThreshold()
@@ -414,6 +417,19 @@ EVminThresholdSet <- function (varObj, thres) {
 #' @return a list object with two elements. 
 #' @keywords Echoview COM scripting
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @examples
+#' \dontrun{
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' varObj <- EVAcoVarNameFinder(EVFile, "120 7x7 convolution")$EVVar
+#' changeSettings <- EVSchoolsDetSet(EVFile, varObj, distanceMode = "GPS distance",
+#'                                 maximumHorizontalLink = 10,
+#'                                 maximumVerticalLink = 5,
+#'                                 minimumCandidateHeight = 2,
+#'                                 minimumCandidateLength = 3,
+#'                                 minimumSchoolHeight = 4,
+#'                                 minimumSchoolLength = 2)
+#'}
 EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
                               maximumHorizontalLink,
                               maximumVerticalLink,
@@ -509,6 +525,12 @@ EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @examples
+#' \dontrun{
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' varObj <- EVAcoVarNameFinder(EVFile, "120 7x7 convolution")$EVVar
+#' }
 EVAcoVarNameFinder <- function (EVFile, acoVarName) {
   
   obj <- EVFile[["Variables"]]$FindByName(acoVarName)
@@ -526,15 +548,21 @@ EVAcoVarNameFinder <- function (EVFile, acoVarName) {
   return(list(EVVar = obj, msg = msg))  
 }
 
-#' Find the class of an Echoview region
+#' Find an Echoview region class by name
 #' 
-#' This function finds the class of an Echoview region using COM scripting.
+#' This function finds an echoview region class by name.
 #' @param EVFile An Echoview file COM object
 #' @param regionClassName A string containing the name of an Echoview region 
 #' @return a list object with two elements. $regionClass: The class of the region, and $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @examples
+#' \dontrun{
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' aggregationsClass <- EVRegionClassFinder(EVFile, "aggregations")$regionClass
+#' }
 EVRegionClassFinder <- function (EVFile, regionClassName) {
   obj <- EVFile[["RegionClasses"]]$FindByName(regionClassName)
   if (is.null(obj)) {
@@ -557,6 +585,13 @@ EVRegionClassFinder <- function (EVFile, regionClassName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @examples
+#' \dontrun{
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' exampleClass <- EVRegionClassFinder(EVFile, "003")$regionClass
+#' EVDeleteRegionClass(EVFile, exampleClass)
+#' }
 EVDeleteRegionClass <- function (EVFile, regionClassCOMObj) {
   classChk <- class(regionClassCOMObj)[1]
   if (classChk != 'COMIDispatch') {
@@ -599,19 +634,21 @@ EVDeleteRegionClass <- function (EVFile, regionClassCOMObj) {
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @examples
 #'\dontrun{
-#' EVSchoolsDetect(EVFile = EVFile,
-#'                 acoVarName='120H Sv mri 0-250m 7x7 convolution',
-#'                 outputRegionClassName = 'krill_swarm',
-#'                 deleteExistingRegions = TRUE,
-#'                 distanceMode = "GPS distance",
-#'                 maximumHorizontalLink = 15, #m
-#'                 maximumVerticalLink = 5,#m
-#'                 minimumCandidateHeight = 1, #m
-#'                 minimumCandidateLength = 10, #m
-#'                 minimumSchoolHeight = 2, #m
-#'                 minimumSchoolLength = 15, #m
-#'                 dataThreshold = -80)
-#' }
+#'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#'EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#'EVSchoolsDetect(EVFile = EVFile,
+#'                acoVarName='120 7x7 convolution',
+#'                outputRegionClassName = 'aggregations',
+#'                deleteExistingRegions = TRUE,
+#'                distanceMode = "GPS distance",
+#'                maximumHorizontalLink = 15, #m
+#'                maximumVerticalLink = 5,#m
+#'                minimumCandidateHeight = 1, #m
+#'                minimumCandidateLength = 10, #m
+#'                minimumSchoolHeight = 2, #m
+#'                minimumSchoolLength = 15, #m
+#'                dataThreshold = -80)
+#'}
 
 
 EVSchoolsDetect <- function(
@@ -699,6 +736,12 @@ EVSchoolsDetect <- function(
 #' @return a list object with one element, $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
+#' @examples
+#' \dontrun{
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVIntegrationByRegionsExport(EVFile, "120 aggregations", "aggregations", exportFn = "C:/Users/Lisa/Desktop/KAOS/EVIntegrationByRegionsExport_example.csv")
+#' }
 EVIntegrationByRegionsExport <- function (EVFile, acoVarName, regionClassName, exportFn,
                                           dataThreshold = NULL) {
   
@@ -765,9 +808,9 @@ msDATEConversion <- function (dateObj) {
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
-#'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj,'~\\example1.EV')$EVFile
-#'EVAddCalibrationFile(EVFile = EVFile, filesetName = 'example', calibrationFile = 'calibration_file.ecs')
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVAddCalibrationFile(EVFile = EVFile, filesetName = '038-120-200', calibrationFile = 'C:/Users/Lisa/Desktop/KAOS/20120326_KAOS_SimradEK5.ecs')
 #'}
 
 EVAddCalibrationFile <- function (EVFile, filesetName, calibrationFile) {
@@ -799,9 +842,9 @@ EVAddCalibrationFile <- function (EVFile, filesetName, calibrationFile) {
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
-#'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#'file.names <- EVFilesInFileset(EVFile = EVFile, filsetName = 'example'))
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' file.names <- EVFilesInFileset(EVFile = EVFile, filesetName = '038-120-200')
 #'}
 
 EVFilesInFileset <- function (EVFile, filesetName) {
@@ -834,9 +877,9 @@ EVFilesInFileset <- function (EVFile, filesetName) {
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
-#'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#'EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#'EVClearRawData(EVFile = EVFile, filesetName = 'example')
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVClearRawData(EVFile = EVFile, filesetName = '038-120-200')
 #'}
 
 EVClearRawData <- function (EVFile, filesetName) {
@@ -872,9 +915,11 @@ EVClearRawData <- function (EVFile, filesetName) {
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
-#'EVAppObj = COMCreate('EchoviewCom.EvApplication')
-#'EVFile = EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#'survey.time = EVFindFilesetTime(EVFile = EVFile, filesetName = 'example')
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' survey.time = EVFindFilesetTime(EVFile = EVFile, filesetName = '038-120-200')
+#' start.time <- survey.time$start.time
+#' end.time <- survey.time$end.time
 #'}
 
 EVFindFilesetTime <- function (EVFile, filesetName) {
@@ -910,9 +955,9 @@ EVFindFilesetTime <- function (EVFile, filesetName) {
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
-#'EVAppObj = COMCreate('EchoviewCom.EvApplication')
-#'EVFile = EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#'EVAddNewClass(EVFile = EVFile, className = 'test_class')
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVNewRegionClass(EVFile = EVFile, className = 'test_class')
 #'}
 
 EVNewRegionClass <- function (EVFile, className) {
@@ -943,10 +988,9 @@ EVNewRegionClass <- function (EVFile, className) {
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
-#' \dontrun{
-#'EVAppObj = COMCreate('EchoviewCom.EvApplication')
-#'EVFile = EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#'EVImportRegionDef(EVFile = EVFile, evrFile = 'test_region_definitions.evr', regionName = 'example.region')
+#' \dontrun{EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVImportRegionDef(EVFile = EVFile, evrFile = 'C:/Users/Lisa/Desktop/KAOS/off transect regions/20030114_1200000000.evr', regionName = 'region_1')
 #'}
 
 EVImportRegionDef <- function (EVFile, evrFile, regionName) {
@@ -988,10 +1032,10 @@ EVImportRegionDef <- function (EVFile, evrFile, regionName) {
 #' @seealso \code{\link{EVOpenFile}} \code{\link{EVImportRegionDef}}
 #' @examples
 #' \dontrun{
-#' EVAppObj = COMCreate('EchoviewCom.EvApplication')
-#' EVFile = EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' EVImportRegionDef(EVFile = EVFile, evrFile = 'test_region_definitions.evr', regionName = 'example.region')
-#' EVExportRegionSv(EVFile = EVFile, variableName = '38H Sv', regionName = 'example.region', filePath = 'C:/Temp/example_region.csv')
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVImportRegionDef(EVFile = EVFile, evrFile = 'C:/Users/Lisa/Desktop/KAOS/off transect regions/20030114_1200000000.evr', regionName = 'region_1')
+#' EVExportRegionSv(EVFile = EVFile, variableName = '120 seabed and surface excluded', regionName = 'region_1', filePath = 'C:/Users/Lisa/Desktop/KAOS/EVExportRegionSv_example.csv')
 #'}
 
 EVExportRegionSv <- function (EVFile, variableName, regionName, filePath) {
@@ -1021,11 +1065,10 @@ EVExportRegionSv <- function (EVFile, variableName, regionName, filePath) {
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @seealso \code{\link{EVOpenFile}} \code{\link{EVAcoVarNameFinder}}
 #' @examples
-#' \dontrun{
-#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' varObj <- EVAcoVarNameFinder(EVFile, acoVarName = "120k Hz raw")
-#' EVadjustDataRngBitmap = function(varObj, minRng = -100, maxRng = 0)
+#' \dontrun{EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' varObj <- EVAcoVarNameFinder(EVFile, acoVarName = "38 data range bitmap")$EVVar
+#' EVAdjustDataRngBitmap(varObj, minRng = -90, maxRng = 0)
 #'}
 
 EVAdjustDataRngBitmap <- function (varObj, minRng, maxRng) {
@@ -1046,9 +1089,7 @@ EVAdjustDataRngBitmap <- function (varObj, minRng, maxRng) {
   #change data range
   postMinrangeFlag = rngAttrib[['RangeMinimum']] <- minRng
   postMaxrangeFlag = rngAttrib[['RangeMaximum']] <- maxRng
-  
-  ##Lisa- check if postMinrangeFlag and postMaxrangeFlag are boolean objects
-  
+    
   #check post min and max values
   postMinrange <- rngAttrib$RangeMinimum()
   postMaxrange <- rngAttrib$RangeMaximum()
@@ -1082,8 +1123,8 @@ EVAdjustDataRngBitmap <- function (varObj, minRng, maxRng) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' EVLine <- EVFindLineByName(EVFile = EVFile, lineName= = "100m line")
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVLine <- EVFindLineByName(EVFile = EVFile, lineName = "Fixed depth 250 m")
 #'}
 EVFindLineByName <- function (EVFile, lineName) {
   
@@ -1118,39 +1159,32 @@ EVFindLineByName <- function (EVFile, lineName) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' varObj <- EVAcoVarNameFinder(EVFile, acoVarName = "120k Hz raw")$EVVar
-#' EVLine <- EVFindLineByName(EVFile = EVFile, lineName = "100m line")$EVLine
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' varObj <- EVAcoVarNameFinder(EVFile, acoVarName = "38 seabed and surface excluded")$EVVar
+#' EVLine <- EVFindLineByName(EVFile = EVFile, lineName = "Fixed depth 250 m")
 #' 
 #' #Change grid to 100m vertical distance and 10m depth grid relative to 100m line 
 #' EVChangeVariableGrid(EVFile = EVFile, acousticVar = varObj, verticalType = 5, horizontalType = 2, verticalDistance = 100, horizontalDistance = 10, EVLine)
-#'
 #' #remove horizontal and vertical grid
 #' EVChangeVariableGrid(EVFile = EVFile, acousticVar = varObj, verticalType = 0, horizontalType = 0)
-#'
+
 #'}
 
 
-EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalType, verticalDistance, horizontalDistance, EVLine = NULL) {
+EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalType, verticalDistance = 0, horizontalDistance = 0, EVLine = NULL) {
   
   #get old grid values for error checking
   old_depth <- acousticVar[["Properties"]][["Grid"]]$DepthRangeSeparation()
   old_distance <- acousticVar[["Properties"]][["Grid"]]$TimeDistanceSeparation()
-  
-  #if user specifies no grid set grid distance to 0
-  if (verticalType == 0) {
-    verticalDistance <- 0
-  }
   
   #change the horizontal and vertical grids
   horizontal <- acousticVar[["Properties"]][["Grid"]]$SetDepthRangeGrid(horizontalType, horizontalDistance)
   vertical   <- acousticVar[["Properties"]][["Grid"]]$SetTimeDistanceGrid(verticalType, verticalDistance)
   
   #change the reference line for the depth grid
-  #in try statement due to EV error that doesn't cause code to fail
-  if (horizontalType == 2) {
+  try(if (horizontalType == 2) {
     acousticVar[["Properties"]][["Grid"]][["DepthRangeReferenceLine"]] <- EVLine
-  }
+  }, silent = TRUE)
   
   
   #get unit type depending on specified grid types
@@ -1193,7 +1227,7 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
 
 #' Export integration by cells for an acoustic variable
 
-#' This function exports the integration by cells for an acoustic variable using COM scripting
+#' This function exports the integration by cells for an acoustic variable using COM scripting. Note: This function will only work if the acoustic variable has a grid.
 #' @param EVFile An Echoview file COM object
 #' @param variableName a string containing the name of an EV acoustic variable
 #' @param filePath a string containing the file path and name to save the exported data to 
@@ -1204,9 +1238,9 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
-#' EVAppObj = COMCreate('EchoviewCom.EvApplication')
-#' EVFile = EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' EVExportIntegrationByCells(EVFile = EVFile, variableName = 'test variable', filePath = 'Desktop/test.csv')
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVExportIntegrationByCells(EVFile = EVFile, variableName = '38 seabed and surface excluded', filePath = 'C:/Users/Lisa/Desktop/KAOS/EVExportIntegrationByCells_example.csv')
 #'}
 
 
@@ -1238,7 +1272,7 @@ EVExportIntegrationByCells <- function (EVFile, variableName, filePath) {
 #' This function adds a new acoustic variable using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param oldVarName a string containing the name of the acoustic variable to base the new variable on
-#' @param enum Enum code for operator. 0 = raw data.
+#' @param enum Enum code for operator. See Echoview help file on EOperator for enum codes.
 #' @return an object: returns the new variable
 #' @keywords Echoview COM scripting
 #' @export
@@ -1248,8 +1282,8 @@ EVExportIntegrationByCells <- function (EVFile, variableName, filePath) {
 #' \dontrun{
 #' #create a 7x7 convolution of a variable
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' EVNewAcousticVar(EVFile = EVFile, oldVarName = "120H-38H Sv mri 0-250m", enum = 43)
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVNewAcousticVar(EVFile = EVFile, oldVarName = "38 seabed and surface excluded", enum = 43)
 #'}
 EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
   
@@ -1287,7 +1321,7 @@ EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #' 
 #' #Double region vertical size and decrease depth by 100m
 #' EVShiftRegionDepth(EVFile, "testregion", 2, 100)
@@ -1339,7 +1373,7 @@ EVShiftRegionDepth <- function (EVFile, regionName, depthMultiply, depthAdd) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #' 
 #' #Shift the region time by 10 seconds
 #' EVShiftRegionTime(EVFile, "testregion", seconds = 10)
@@ -1384,8 +1418,8 @@ EVShiftRegionTime <- function (EVFile, regionName, days = 0, hours = 0, minutes 
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' EVGetCalibrationFileName(EVFile = EVFile, filesetName = "38H-120H-200H")
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVGetCalibrationFileName(EVFile = EVFile, filesetName = "038-120-200")
 #'}
 EVGetCalibrationFileName <- function (EVFile, filesetName) {
   
@@ -1421,17 +1455,15 @@ EVGetCalibrationFileName <- function (EVFile, filesetName) {
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
-#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' 
-#' #create a region between pings 1 - 100 and depths 20-250m
-#' EVNewLineRelativeRegion(EVFile, "38H hri ex noise", "test", "20 m Fixed depth", "250 m Fixed depth", 1, 100)
+#'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#'EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #'
-#' #create an unbounded region between depths 250-750m
-#' EVNewLineRelativeRegion(EVFile, "38H hri ex noise", "test", "250 m Fixed depth", "750 m Fixed depth")
+#'#create a region between pings 1 - 100 and depths 20-250m
+#'newRegion <- EVNewLineRelativeRegion(EVFile, "38 seabed and surface excluded", "test", "Fixed depth 6 m", "Fixed depth 250 m", 1, 100)
+#'
+#'#create an unbounded region between depths 250-750m
+#'newRegion <- EVNewLineRelativeRegion(EVFile, "38 seabed and surface excluded", "test", "Fixed depth 6 m", "Fixed depth 250 m")
 #'}
-
-
 EVNewLineRelativeRegion <- function (EVFile, varName, regionName, line1, line2, firstPing = NA, lastPing = NA) {
   
   acoustic.var <- EVFile[["Variables"]]$FindByName(varName)
@@ -1473,13 +1505,11 @@ EVNewLineRelativeRegion <- function (EVFile, varName, regionName, line1, line2, 
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #' 
 #' #create a new line at 50m depth named "testline"
-#' EVNewFixedDepthLine(EVFile = EVFile, depth = 50, lineName = "testline")
+#' newLine <- EVNewFixedDepthLine(EVFile = EVFile, depth = 50, lineName = "testline")
 #'}
-
-
 EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
   
   #check if there is already a line with that name
@@ -1516,9 +1546,9 @@ EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
 #' 
-#' testline <- EVNewFixedDepthLine(EVFile = EVFile, depth = 50, lineName = "testline")
+#' testline <- EVNewFixedDepthLine(EVFile = EVFile, depth = 50, lineName = "test_line")
 #' EVDeleteLine(EVFile = EVFile, evLine = testline)
 #'}
 EVDeleteLine <- function (EVFile, evLine) {
@@ -1529,9 +1559,9 @@ EVDeleteLine <- function (EVFile, evLine) {
     msg=paste(Sys.time(), "Success: Line deleted")
     message(msg)
   }
-   else {
+  else {
     msg=paste(Sys.time(), "Error: Line not deleted")
-   warning(msg)}
+    message(msg)}
   invisible(list(msg=msg))
   
 }
@@ -1551,7 +1581,8 @@ EVDeleteLine <- function (EVFile, evLine) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' 
 #' testline <- EVNewFixedDepthLine(EVFile = EVFile, depth = 50, lineName = "testline")
 #' EVRenameLine(EVFile = EVFile, evLine = testline, newName = "line40")
 #'}
@@ -1589,8 +1620,9 @@ EVRenameLine <- function (EVFile, evLine, newName) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' testRegion <- EVFindRegionByName(EVFile, "test")
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' 
+#' testRegion <- EVFindRegionByName(EVFile, "Region1")
 #'}
 EVFindRegionByName <- function (EVFile, regionName) {
   
@@ -1621,12 +1653,13 @@ EVFindRegionByName <- function (EVFile, regionName) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' EVExportRegionDef(EVFile, regionName = "test", filePath = "C:/Users/Test/Documents/region_def.csv")
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' 
+#' EVExportRegionDef(EVFile, regionName = "Region1", filePath = "C:/Users/Lisa/Desktop/KAOS/EVExportRegionDef.csv")
 #'}
 EVExportRegionDef <- function (EVFile, regionName, filePath) {
   
-  ev.region <- EVAddCalibrationFile(EVFile, regionName)
+  ev.region <- EVFindRegionByName(EVFile, regionName)
   
   if (exists("ev.region") == FALSE) {
     stop(paste("Couldn't find region named", regionName, sep = " "))
@@ -1658,9 +1691,10 @@ EVExportRegionDef <- function (EVFile, regionName, filePath) {
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
-#' EVFile <- EVOpenFile(EVAppObj, '~\\example1.EV')$EVFile
-#' regionClass <- EVRegionClassFinder(EVFile, "Export")$regionClass
-#' EVExportRegionDefByClass(evRegionClass = regionClass, filePath = "C:/Users/Test/Documents/region_definitions.csv")
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' 
+#' regionClass <- EVRegionClassFinder(EVFile, "aggregations")$regionClass
+#' EVExportRegionDefByClass(evRegionClass = regionClass, filePath = "C:/Users/Lisa/Desktop/KAOS/EVExportRegionDefByClass_example.csv")
 #'}
 EVExportRegionDefByClass <- function (evRegionClass, filePath) {
   
@@ -1686,7 +1720,10 @@ EVExportRegionDefByClass <- function (evRegionClass, filePath) {
 #' @seealso \code{\link{EVOpenFile}} \code{\link{EVFindRegionByName}}
 #' @examples
 #' \dontrun{
-#' ev.region <- EVFindRegionByName(EVFile, regionName)
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' 
+#' ev.region <- EVFindRegionByName(EVFile, "Region1")
 #' EVFindRegionClass(ev.region)
 #' }
 
@@ -1953,8 +1990,7 @@ exportMIF=function(coords,pathAndFileName,pointNameExport=FALSE,pointNameScaleFa
   }  
   write.table(coords,pathAndFileName,quote=F,
               append=T,row.names=F,col.names=F,sep='\t')
-   return(paste('')) 
+  return(paste('')) 
 }
-
 
 
