@@ -519,7 +519,7 @@ EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
 }
 
 
-#' Find an acoustic variable by name 
+#' Find an acoustic variable by name
 #' 
 #' This function finds an acoustic variable in an Echoview file by name and 
 #' returns the variable pointer.
@@ -897,8 +897,8 @@ EVClearRawData <- function (EVFile, filesetName) {
   nbr.of.raw.in.fileset <- destination.fileset[["DataFiles"]]$Count()
   
   #remove files
-  message(paste(Sys.time(), ' : Removing data files from EV file ', sep =""))
-  
+  msg <- paste(Sys.time(), ' : Removing data files from EV file ', sep ="")
+  message(msg)
   
   while (nbr.of.raw.in.fileset > 0) {
     dataFiles <- destination.fileset[["DataFiles"]]$Item(0)$FileName()
@@ -1554,7 +1554,7 @@ EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
 #' This function deletes an Echoview line object using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param evLine an Echoview line object
-#' @return a list object with one element- fucntion message for log
+#' @return a list object with one element- function message for log
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
@@ -2010,3 +2010,59 @@ exportMIF=function(coords,pathAndFileName,pointNameExport=FALSE,pointNameScaleFa
 }
 
 
+#' Export integration by regions by cells from an Echoview acoustic variable
+#' 
+#' This function performs integration by regions by cells for a specified region class and exports the results using COM scripting.
+#' @param EVFile An Echoview file object
+#' @param acoVarName A string containing the name of an Echoview acoustic variable
+#' @param regionClassName A string containing the name of an Echoview region class
+#' @param exportFn export filename and path 
+#' @param dataThreshold An optional data threshold for export
+#' @return a list object with one element, $msg: message for processing log.
+#' @keywords Echoview COM scripting
+#' @export
+#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}}
+#' @examples
+#' \dontrun{
+#' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
+#' EVFile <- EVOpenFile(EVAppObj,'C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV')$EVFile
+#' EVIntegrationByRegionsByCellsExport(EVFile, "120 aggregations", "aggregations", exportFn = "C:/Users/Lisa/Desktop/KAOS/EVIntegrationByRegionsExport_example.csv")
+#' }
+EVIntegrationByRegionsByCellsExport <- function (EVFile, acoVarName, regionClassName, exportFn,
+                                          dataThreshold = NULL) {
+  
+  acoVarObj <- EVAcoVarNameFinder(EVFile = EVFile, acoVarName = acoVarName)
+  msgV      <- acoVarObj$msg
+  acoVarObj <- acoVarObj$EVVar
+  EVRC      <- EVRegionClassFinder(EVFile = EVFile, regionClassName = regionClassName)
+  msgV      <- c(msgV, EVRC$msg)
+  RC        <- EVRC$regionClass
+  if (is.null(dataThreshold)) {
+    msg <- paste(Sys.time(),' : Removing minimum data threshold from ', acoVarName, sep = '')
+    message(msg)
+    msgV   <- c(msgV,msg)
+    varDat <- acoVarObj[["Properties"]][["Data"]]
+    varDat[['ApplyMinimumThreshold']] <- FALSE
+  } else {
+    msg <- EVminThresholdSet(varObj=acoVarObj,thres= dataThreshold)$msg
+    message(msg)
+    msgV <- c(msgV, msg)
+  }
+  
+  msg <- paste(Sys.time(), ' : Starting integration and export of ', regionClassName, sep = '')
+  message(msg)
+  success <- acoVarObj$ExportIntegrationByRegionsByCells(exportFn, RC)
+  
+  if (success) {
+    msg <- paste(Sys.time(), ' : Successful integration and export of ', regionClassName, sep = '')
+    message(msg)
+    msgV <- c(msgV, msg)
+  } else {
+    msg <- paste(Sys.time(), ' : Failed to integrate and/or export ', regionClassName, sep = '')
+    warning(msg)
+    msgV <- c(msgV, msg)
+  } 
+  
+  invisible(list(msg = msgV))
+}
