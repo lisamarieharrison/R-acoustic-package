@@ -52,6 +52,7 @@ EVOpenFile <- function (EVAppObj, fileName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -65,7 +66,7 @@ EVSaveFile <- function (EVFile) {
   if (chk) {
     message(msg)
   } else {
-    warning(msg)
+    stop(msg)
   }
   invisible(list(chk = chk, msg = msg))
 }
@@ -94,7 +95,7 @@ EVSaveAsFile <- function (EVFile,fileName) {
   if (chk) {
     message(msg)
   } else {
-    warning(msg)
+    stop(msg)
   }
   invisible(list(chk = chk, msg = msg))
 }
@@ -107,6 +108,7 @@ EVSaveAsFile <- function (EVFile,fileName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -150,7 +152,7 @@ EVNewFile <- function (EVAppObj, templateFn = NULL) {
     nbrVars <- EvFile[['Variables']]$Count()
     if (nbrVars == 0) {
       msg <- paste(Sys.time(), ' : Either an incorrect template filename or template contains no variables', sep = '')
-      warning(msg)
+      stop(msg)
       msgV <- c(msgV,msg)
     } else {
       msg <- paste(Sys.time(), ' : Echoview file created from template ', 
@@ -162,7 +164,7 @@ EVNewFile <- function (EVAppObj, templateFn = NULL) {
   } 
   if (!is.character(templateFn) & !is.null(templateFn)) {
     msgV <- paste(Sys.time(), ' : Incorrect ARG templateFn specification in EVNewFile()', sep = '')
-    warning(msgV)
+    stop(msgV)
     return(msgV)}
   invisible(list(EVFile = EvFile, msg = msgV))
 }
@@ -176,7 +178,7 @@ EVNewFile <- function (EVAppObj, templateFn = NULL) {
 #' @keywords Echoview COM scripting
 #' @export 
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVNewFile}}  \code{\link{EVCreateNew}}
+#' @seealso \code{\link{EVNewFile}}  \code{\link{EVCreateNew}} \code{\link{EVOpenFile}}
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -207,7 +209,7 @@ EVCreateFileset <- function (EVFile, filesetName) {
 #' @keywords Echoview COM scripting
 #' @export 
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVNewFile}}  \code{\link{EVCreateNew}} \code{\link{EVCreateFileset}}
+#' @seealso \code{\link{EVNewFile}}  \code{\link{EVCreateNew}} \code{\link{EVCreateFileset}} \code{\link{EVOpenFile}}
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -230,7 +232,7 @@ EVFindFilesetByName <- function (EVFile, filesetName) {
   } else {
     msg <- paste(Sys.time(), ' : The fileset called ', filesetName, ' not found in ', 
                  EVFile$FileName(), sep = '')
-    warning(msg)
+    stop(msg)
     msgV <- c(msgV, msg)
     return(list(filesetObj = NULL, msg = msgV))
   }  
@@ -304,14 +306,14 @@ EVAddRawData <- function (EVFile, filesetName, dataFiles) {
 #'#remove any evi type files
 #'eviLoc=grep('.evi',pathAndFn)
 #'if(length(eviLoc)>0) (pathAndFn=pathAndFn[-eviLoc])
-#'EVCreateNewWithData(EVAppObj=EVAppObj,
+#'EVCreateNew(EVAppObj=EVAppObj,
 #'                  templateFn="C:/Users/Lisa/Desktop/KAOS/KAOStemplate.EV",
 #'                  EVFileName='C:/Users/Lisa/Desktop/KAOS/kaos.ev',
 #'                  filesetName="038-120-200",
 #'                  dataFiles=pathAndFn, 
 #'                  CloseOnSave = TRUE)
 #'}
-EVCreateNewWithData <- function (EVAppObj, templateFn = NULL, EVFileName, 
+EVCreateNew <- function (EVAppObj, templateFn = NULL, EVFileName, 
                                  filesetName, dataFiles,
                                  CloseOnSave=TRUE) {
   msgV <- paste(Sys.time(), ' : Creating new EV file', sep = '')
@@ -340,6 +342,7 @@ EVCreateNewWithData <- function (EVAppObj, templateFn = NULL, EVFileName,
 #' @keywords Echoview COM scripting
 #' @export 
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVAcoVarNameFinder}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -402,9 +405,9 @@ EVminThresholdSet <- function (varObj, thres) {
 }  
 
 
-#' Schools detection settings/ needs documentation
+#' Change schools detection settings
 #' 
-#' This function changes schools detection settings
+#' This function changes schools detection settings for an acoustic variable using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param varObj the EV acoustic object to change schools detection parameters for
 #' @param distanceMode which distance mode to use
@@ -417,6 +420,7 @@ EVminThresholdSet <- function (varObj, thres) {
 #' @return a list object with two elements. 
 #' @keywords Echoview COM scripting
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVAcoVarNameFinder}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -525,6 +529,7 @@ EVSchoolsDetSet  <- function (EVFile, varObj, distanceMode,
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -539,7 +544,7 @@ EVAcoVarNameFinder <- function (EVFile, acoVarName) {
   }
   if (is.null(obj)) {
     msg <- paste(Sys.time(), ' : Variable not found ', acoVarName, sep = '')
-    warning(msg)
+    stop(msg)
     obj <- NULL
   } else {
     msg <- paste(Sys.time(), ' : Variable found ', acoVarName, sep = '') 
@@ -557,6 +562,7 @@ EVAcoVarNameFinder <- function (EVFile, acoVarName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -567,7 +573,7 @@ EVRegionClassFinder <- function (EVFile, regionClassName) {
   obj <- EVFile[["RegionClasses"]]$FindByName(regionClassName)
   if (is.null(obj)) {
     msg <- paste(Sys.time(), ' : Region class not found -', regionClassName, sep = '')
-    warning(msg)
+    stop(msg)
     obj <- NULL
   } else {
     msg <- paste(Sys.time(), ' : Region class found -', regionClassName, sep = '') 
@@ -585,6 +591,7 @@ EVRegionClassFinder <- function (EVFile, regionClassName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVRegionClassFinder}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -632,6 +639,7 @@ EVDeleteRegionClass <- function (EVFile, regionClassCOMObj) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #'\dontrun{
 #'EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -713,7 +721,7 @@ EVSchoolsDetect <- function(
   nbrDetSchools <- varObj$DetectSchools(regObj$Name())
   if (nbrDetSchools == -1) {
     msg <- paste(Sys.time(),' : Schools detection failed.')
-    warning(msg)
+    stop(msg)
   } else {
     msg <- paste(Sys.time(), ' : ',nbrDetSchools , ' schools detected in variable ', 
                  varObj$Name(), sep = '')
@@ -736,6 +744,8 @@ EVSchoolsDetect <- function(
 #' @return a list object with one element, $msg: message for processing log.
 #' @keywords Echoview COM scripting
 #' @export
+#' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
+#' @seealso \code{\link{EVOpenFile}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -818,8 +828,7 @@ EVAddCalibrationFile <- function (EVFile, filesetName, calibrationFile) {
   destination.fileset <- EVFindFilesetByName(EVFile, filesetName)$fileset
   add.calibration <- destination.fileset$SetCalibrationFile(calibrationFile)  
   
-  msg <- paste(Sys.time(), ' : Adding ', basename(calibrationFile),' to fileset name ', filesetName, sep = '')
-  message(msg)
+  message(paste(Sys.time(), ' : Adding ', basename(calibrationFile),' to fileset name ', filesetName, sep = ''))
   
   if (add.calibration) {
     msg <- paste(Sys.time(), "Success: Added calibration file", basename(calibrationFile), "to fileset name", filesetName)
@@ -827,7 +836,7 @@ EVAddCalibrationFile <- function (EVFile, filesetName, calibrationFile) {
     msg <- paste(Sys.time(), "Error: Could not add calibration file", basename(calibrationFile), "to fileset name", filesetName)
   }
   message(msg)
-  
+  invisible(msg)
 }
 
 #' Find names of all raw files in a fileset
@@ -898,9 +907,13 @@ EVClearRawData <- function (EVFile, filesetName) {
     destination.fileset[["DataFiles"]]$Remove(rmfile) 
     nbr.of.raw.in.fileset <- destination.fileset[["DataFiles"]]$Count()
     
-    message(paste(Sys.time(), ' : Removing ', basename(dataFiles),' from fileset name ', 
-                  filesetName, sep = ""))
+    msg <- paste(Sys.time(), ' : Removing ', basename(dataFiles),' from fileset name ', 
+                 filesetName, sep = "")
+    message(msg)
   }
+  
+  invisible(msg)
+  
 }
 
 #' Find the time and date of the start and end of an Echoview fileset
@@ -968,11 +981,11 @@ EVNewRegionClass <- function (EVFile, className) {
     add.class <- EVFile[["RegionClasses"]]$Add(className[i])
     
     if (add.class) {
-      add.class
-      message(paste(Sys.time(), ' : Added region class', className[i], 'to EVFile' , sep = ' '))
+      msg <- paste(Sys.time(), ' : Added region class', className[i], 'to EVFile' , sep = ' ')
     }  else {
-      message(paste(Sys.time(), ' : Error: could not add region class', className[i],'to EVFile' , sep = ' '))      
+      msg <- paste(Sys.time(), ' : Error: could not add region class', className[i],'to EVFile' , sep = ' ')
     }
+    message(msg)
   }
 }
 
@@ -1006,15 +1019,17 @@ EVImportRegionDef <- function (EVFile, evrFile, regionName) {
     CheckName <- EVFile[["Regions"]]$FindByName(regionName)
     
     if (is.null(CheckName) == FALSE) {
-      message(paste(Sys.time(), ' : Imported region definitions: Region ', regionName, 
-                    ' added', sep = ''))
+      msg <- paste(Sys.time(), ' : Imported region definitions: Region ', regionName, 
+                    ' added', sep = '')
     } else {
-      message(paste(Sys.time(), ' : Failed to import region definitions' , sep = ''))
+      msg <- paste(Sys.time(), ' : Failed to import region definitions' , sep = '')
     }
     
   } else { 
-    message(paste(Sys.time(), ' : Failed to import region definitions: A region of that name already exists' ))
+    msg <- paste(Sys.time(), ' : Failed to import region definitions: A region of that name already exists' )
   }
+  message(msg)
+  invisible(msg)
 }
 
 
@@ -1045,16 +1060,19 @@ EVExportRegionSv <- function (EVFile, variableName, regionName, filePath) {
   export.data  <- acoustic.var$ExportDataForRegion(filePath, ev.region)
   
   if (export.data) {
-    message(paste(Sys.time(), ' : Exported data for Region ', regionName, ' in Variable ', 
-                  variableName, sep = ''))
+    msg <- paste(Sys.time(), ' : Exported data for Region ', regionName, ' in Variable ', 
+                  variableName, sep = '')
   } else {
-    message(paste(Sys.time(), ' : Failed to export data' , sep = ""))
+    msg <- paste(Sys.time(), ' : Failed to export data' , sep = "")
   }
+  
+  message(msg)
+  invisible(msg)
   
 }
 
 #' Change the data range bitmap of an acoustic object
-
+#'
 #' This function changes the data range in an Echoview data range bitmap virtual variable
 #' @param varObj An Echoview acoustic variable COM object, perhaps resulting from a call of EVAcoVarNameFinder()
 #' @param minRng the minimum data value to set
@@ -1111,7 +1129,7 @@ EVAdjustDataRngBitmap <- function (varObj, minRng, maxRng) {
 } 
 
 #' Find an EV Line object by name
-
+#'
 #' This function finds an EV Line in an EV file object by name using COM scripting.
 #' @param EVFile An Echoview file COM object
 #' @param lineName a string containing the name of the line to find
@@ -1142,7 +1160,7 @@ EVFindLineByName <- function (EVFile, lineName) {
 
 
 #' Change the grid of an acoustic variable
-
+#'
 #' This function sets the grid separation and depth reference line for an acoustic variable using COM scripting.
 #' @param EVFile An Echoview file COM object
 #' @param acousticVar an EV acoustic variable object
@@ -1226,7 +1244,7 @@ EVChangeVariableGrid <- function (EVFile, acousticVar, verticalType, horizontalT
 }
 
 #' Export integration by cells for an acoustic variable
-
+#'
 #' This function exports the integration by cells for an acoustic variable using COM scripting. Note: This function will only work if the acoustic variable has a grid.
 #' @param EVFile An Echoview file COM object
 #' @param variableName a string containing the name of an EV acoustic variable
@@ -1250,25 +1268,26 @@ EVExportIntegrationByCells <- function (EVFile, variableName, filePath) {
   
   #check that the acoustic variable exists
   if (is.null(acoustic.var)) {
-    message(paste(Sys.time(), "Error:", variableName, "is not an acoustic variable", sep = " "))  
+    msg <- paste(Sys.time(), "Error:", variableName, "is not an acoustic variable", sep = " ")
     
   } else {
     
     export.data <- acoustic.var$ExportIntegrationByCellsAll(filePath)
     
     if (export.data) {
-      message(paste(Sys.time(), 'Success: Exported integration by cells for variable', variableName, sep = " "))
+      msg <- paste(Sys.time(), 'Success: Exported integration by cells for variable', variableName, sep = " ")
     } else {
-      message(paste(Sys.time(), 'Error: Failed to export data'))
+      msg <- paste(Sys.time(), 'Error: Failed to export data')
     }
   }
   
+  message(msg)
+  invisible(msg)
+  
 }
 
-
-
 #' Add a new acoustic variable
-
+#'
 #' This function adds a new acoustic variable using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param oldVarName a string containing the name of the acoustic variable to base the new variable on
@@ -1307,7 +1326,7 @@ EVNewAcousticVar <- function (EVFile, oldVarName, enum) {
 }
 
 #' Change the depth of an Echoview Region
-
+#'
 #' This function shifts the depth of an echoview region using COM scripting. Vertical size of the region and depth offset can be changed.
 #' @param EVFile An Echoview file COM object
 #' @param regionName a string containing the name of the Echoview region
@@ -1356,7 +1375,7 @@ EVShiftRegionDepth <- function (EVFile, regionName, depthMultiply, depthAdd) {
 
 
 #' Change the time of an Echoview Region
-
+#'
 #' This function shifts the time of an echoview region using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param regionName a string containing the name of the Echoview region
@@ -1406,13 +1425,12 @@ EVShiftRegionTime <- function (EVFile, regionName, days = 0, hours = 0, minutes 
 
 
 #' Gets the calibration file name of a fileset
-
+#' 
 #' This function gets the calibration file name of a filesset using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param filesetName a string containing the name of the Echoview fileset
 #' @return an object: returns the calibration file name
 #' @keywords Echoview COM scripting
-#' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
@@ -1439,7 +1457,7 @@ EVGetCalibrationFileName <- function (EVFile, filesetName) {
 }
 
 #' Creates a new line relative region in the current variable
-
+#'
 #' This function creates a new line relative region in the current variable using COM scripting. The upper and lower depths are specified using Echoview line objects (these must already exist). Left and right bounds are optionally specified using ping number.
 #' @param EVFile An Echoview file COM object
 #' @param varName a string containing the name of the acoustic variable to create the region in
@@ -1450,7 +1468,6 @@ EVGetCalibrationFileName <- function (EVFile, filesetName) {
 #' @param lastPing an optional integer for the ping to end the region at
 #' @return returns the EV Region object
 #' @keywords Echoview COM scripting
-#' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
@@ -1492,14 +1509,13 @@ EVNewLineRelativeRegion <- function (EVFile, varName, regionName, line1, line2, 
 
 
 #' Creates a new fixed depth Echoview line
-
+#'
 #' This function creates a new Echoview line at a fixed depth using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param depth an integer specifying the fixed depth of the new line
 #' @param lineName a string containing the name for the new line
 #' @return returns the EV Line object
 #' @keywords Echoview COM scripting
-#' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
 #' @seealso \code{\link{EVOpenFile}}
 #' @examples
@@ -1534,7 +1550,7 @@ EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
 
 
 #' Deletes an Echoview line object
-
+#'
 #' This function deletes an Echoview line object using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param evLine an Echoview line object
@@ -1542,7 +1558,7 @@ EVNewFixedDepthLine <- function (EVFile, depth, lineName) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVOpenFile}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVNewFixedDepthLine}} \code{\link{EVFindLineByName}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1568,7 +1584,7 @@ EVDeleteLine <- function (EVFile, evLine) {
 
 
 #' Renames an Echoview Line object
-
+#'
 #' This function renames an Echoview line object using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param evLine an Echoview line object
@@ -1577,7 +1593,7 @@ EVDeleteLine <- function (EVFile, evLine) {
 #' @keywords Echoview COM scripting
 #' @export
 #' @references \url{http://support.echoview.com/WebHelp/Echoview.htm/}
-#' @seealso \code{\link{EVOpenFile}} \code{\link{EVNewFixedDepthLine}}
+#' @seealso \code{\link{EVOpenFile}} \code{\link{EVNewFixedDepthLine}} \code{\link{EVFindLineByName}}
 #' @examples
 #' \dontrun{
 #' EVAppObj <- COMCreate('EchoviewCom.EvApplication')
@@ -1608,7 +1624,7 @@ EVRenameLine <- function (EVFile, evLine, newName) {
 }
 
 #' Finds an Echoview region by name
-
+#'
 #' This function finds an Echoview region by name using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param regionName a string containing the name of the region to find
@@ -1640,7 +1656,7 @@ EVFindRegionByName <- function (EVFile, regionName) {
 
 
 #' Exports an Echoview region definition
-
+#'
 #' This function exports a single region's definition as a .csv file using COM scripting
 #' @param EVFile An Echoview file COM object
 #' @param regionName a string containing the region name to export definitions for
@@ -1679,7 +1695,7 @@ EVExportRegionDef <- function (EVFile, regionName, filePath) {
 
 
 #' Exports definitions for all Echoview regions in a region class
-
+#'
 #' This function exports definitions for all Echoview regions within a region class using COM scripting
 #' @param evRegionClass an Echoview region class object
 #' @param filePath a string containing the name and file path of the file to export to
@@ -1710,7 +1726,7 @@ EVExportRegionDefByClass <- function (evRegionClass, filePath) {
 }
 
 #' Find the class of an Echoview region object
-
+#'
 #' This function finds the class of an Echoview region object using COM scripting.
 #' @param evRegion and Echoview Region object
 #' @return a string containing the class of the region
