@@ -1,5 +1,6 @@
 # Extracts data around multiple CTD stations from Echoview using the R acoustic package
-# Functions must be loaded in first and the RDCOMClient library
+library(RDCOMClient)
+library(EchoviewR)
 
 startEchoView <- function(){
   result <- NULL
@@ -22,7 +23,7 @@ startEchoView <- function(){
 }
 
 
-for (i in 46:118){
+for (i in 1:118){
   tryCatch({
     #read in the .csv file containing the start and end times for each CTD drop
     ctd.info <- read.csv(file = "C:/Users/Lisa/Documents/phd/southern ocean/BROKE-West raw data/Echoview/test/ctd_information.csv")
